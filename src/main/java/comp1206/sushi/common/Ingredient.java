@@ -1,8 +1,5 @@
 package comp1206.sushi.common;
 
-import comp1206.sushi.common.Ingredient;
-import comp1206.sushi.common.Supplier;
-
 public class Ingredient extends Model {
 
 	private String name;
@@ -11,6 +8,7 @@ public class Ingredient extends Model {
 	private Number restockThreshold;
 	private Number restockAmount;
 	private Number weight;
+	private Number stock = 0;
 
 	public Ingredient(String name, String unit, Supplier supplier, Number restockThreshold,
 			Number restockAmount, Number weight) {
@@ -68,6 +66,14 @@ public class Ingredient extends Model {
 
 	public void setWeight(Number weight) {
 		this.weight = weight;
+	}
+
+	public Number getStock() {
+		return this.stock;
+	}
+
+	public void setStock(Number stock) {
+		this.stock = stock;
 	}
 
 }

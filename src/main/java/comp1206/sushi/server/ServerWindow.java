@@ -1,24 +1,25 @@
 package comp1206.sushi.server;
 
-import java.util.*;
+import comp1206.sushi.common.*;
+import comp1206.sushi.server.ServerInterface.UnableToDeleteException;
+
+import javax.swing.*;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.awt.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.lang.reflect.Method;
-
-import javax.swing.*;
-import javax.swing.GroupLayout.*;
-import javax.swing.event.*;
-import javax.swing.table.AbstractTableModel;
-
-import comp1206.sushi.common.*;
-import comp1206.sushi.server.ServerInterface.UnableToDeleteException;
 
 /**
  * Provides the Sushi Server user interface
@@ -845,7 +846,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 					} else {
 						try {
 							Method method = model.getClass().getDeclaredMethod("get" + columnName);
-							Object result = method.invoke(model, new Object[] {});
+							Object result = method.invoke(model);
 							if(result instanceof Model) {
 								data[index][col] = ((Model) result).getName();
 							} else {

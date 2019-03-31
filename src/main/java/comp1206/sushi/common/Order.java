@@ -1,19 +1,16 @@
 package comp1206.sushi.common;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Random;
-
-import comp1206.sushi.common.Order;
+import java.util.HashMap;
 
 public class Order extends Model {
 
 	private String status;
-	
-	public Order() {
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/YYYY HH:mm:ss");  
-		LocalDateTime now = LocalDateTime.now();  
-		this.name = dtf.format(now);
+	private HashMap<Dish, Integer> order;
+	private User sushiEater;
+
+	public Order(HashMap<Dish, Integer> order, User sushiEater) {
+		this.order = order;
+		this.sushiEater = sushiEater;
 	}
 
 	public Number getDistance() {
@@ -22,7 +19,7 @@ public class Order extends Model {
 
 	@Override
 	public String getName() {
-		return this.name;
+		return this.sushiEater.toString();
 	}
 
 	public String getStatus() {

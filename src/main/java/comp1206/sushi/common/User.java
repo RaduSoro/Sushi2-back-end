@@ -1,8 +1,5 @@
 package comp1206.sushi.common;
 
-import comp1206.sushi.common.Postcode;
-import comp1206.sushi.common.User;
-
 public class User extends Model {
 	
 	private String name;

@@ -542,7 +542,7 @@ public class ClientWindow extends JFrame implements UpdateListener {
 		 */
 		public class RegisterPanel extends JPanel {
 
-			private static final[] long serialVersionUID = 6908873031511662190L;
+			//private static final[] long serialVersionUID = 6908873031511662190L;
 			private ParallelGroup groupLabels;
 			private ParallelGroup groupFields;
 			private SequentialGroup groupRows;
@@ -748,7 +748,7 @@ public class ClientWindow extends JFrame implements UpdateListener {
 					} else {
 						try {
 							Method method = model.getClass().getDeclaredMethod("get" + columnName);
-							Object result = method.invoke(model, new Object[] {});
+							Object result = method.invoke(model);
 							if(result instanceof Model) {
 								data[index][col] = ((Model) result).getName();
 							} else {
