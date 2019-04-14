@@ -26,7 +26,8 @@ public class Server implements ServerInterface {
 	public Server() {
         logger.info("Starting up server...");
 
-        cfgReader = new Configuration("Sushi2-back-end\\src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this);
+		cfgReader = new Configuration("Sushi2-back-end\\src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this); //running from compiler
+		//cfgReader = new Configuration("src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this);//running from mvn
 	}
 	
 	@Override
@@ -50,7 +51,6 @@ public class Server implements ServerInterface {
 
 	@Override
 	public Map<Dish, Number> getDishStockLevels() {
-		Random random = new Random();
 		List<Dish> dishes = getDishes();
 		HashMap<Dish, Number> levels = new HashMap<Dish, Number>();
 		for(Dish dish : dishes) {
@@ -167,13 +167,11 @@ public class Server implements ServerInterface {
 	
 	@Override
 	public Number getOrderCost(Order order) {
-		Random random = new Random();
-		return random.nextInt(100);
+		return order.getPrice();
 	}
 
 	@Override
 	public Map<Ingredient, Number> getIngredientStockLevels() {
-		Random random = new Random();
 		List<Ingredient> dishes = getIngredients();
 		HashMap<Ingredient, Number> levels = new HashMap<Ingredient, Number>();
 		for(Ingredient ingredient : ingredients) {
@@ -250,7 +248,7 @@ public class Server implements ServerInterface {
 
 	@Override
 	public void loadConfiguration(String filename) {
-		System.out.println("Loaded configuration: " + filename);
+		cfgReader = new Configuration(filename, this);
 	}
 
 	@Override

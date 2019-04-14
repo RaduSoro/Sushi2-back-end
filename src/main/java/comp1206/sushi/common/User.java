@@ -34,4 +34,8 @@ public class User extends Model {
 		this.postcode = postcode;
 	}
 
+	public String getPassword() {
+		return this.password;
+	}
+
 }

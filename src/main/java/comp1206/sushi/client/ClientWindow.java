@@ -542,7 +542,7 @@ public class ClientWindow extends JFrame implements UpdateListener {
 		 */
 		public class RegisterPanel extends JPanel {
 
-			//private static final[] long serialVersionUID = 6908873031511662190L;
+			private static final long serialVersionUID = 6908873031511662190L;
 			private ParallelGroup groupLabels;
 			private ParallelGroup groupFields;
 			private SequentialGroup groupRows;

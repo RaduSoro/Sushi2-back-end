@@ -1,96 +1,156 @@
 package comp1206.sushi.client;
 
-import java.util.List;
-import java.util.Map;
 
+import java.util.*;
+
+import comp1206.sushi.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import comp1206.sushi.common.Dish;
-import comp1206.sushi.common.Order;
-import comp1206.sushi.common.Postcode;
-import comp1206.sushi.common.Restaurant;
-import comp1206.sushi.common.UpdateListener;
-import comp1206.sushi.common.User;
-
 public class Client implements ClientInterface {
 
+
     private static final Logger logger = LogManager.getLogger("Client");
-	
+    public ArrayList<Dish> dishes = new ArrayList<Dish>();
+    public ArrayList<Drone> drones = new ArrayList<Drone>();
+    public ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
+    public ArrayList<Order> orders = new ArrayList<Order>();
+    public ArrayList<Staff> staff = new ArrayList<Staff>();
+    public ArrayList<Supplier> suppliers = new ArrayList<Supplier>();
+    public ArrayList<User> users = new ArrayList<User>();
+    public ArrayList<Postcode> postcodes = new ArrayList<Postcode>();
+    Postcode restaurantPostcode = new Postcode("SO17 1BJ");
+    public Restaurant restaurant = new Restaurant("Mine", restaurantPostcode);
+    private ArrayList<UpdateListener> listeners = new ArrayList<UpdateListener>();
+    private ClientInterface client;
+
 	public Client() {
         logger.info("Starting up client...");
+        postcodes.add(restaurantPostcode);
+        Postcode postcode1 = new Postcode("SO17 1TJ");
+        postcodes.add(postcode1);
+        Postcode postcode2 = new Postcode("SO17 1BX");
+        postcodes.add(postcode2);
+        Postcode postcode3 = new Postcode("SO17 2NJ");
+        postcodes.add(postcode3);
+        Postcode postcode4 = new Postcode("SO17 1TW");
+        postcodes.add(postcode4);
+        Postcode postcode5 = new Postcode("SO17 2LB");
+        postcodes.add(postcode5);
+
+        Supplier supplier1 = new Supplier("Supplier 1", postcode1);
+        suppliers.add(supplier1);
+        Supplier supplier2 = new Supplier("Supplier 2", postcode2);
+        suppliers.add(supplier2);
+        Supplier supplier3 = new Supplier("Supplier 3", postcode3);
+        suppliers.add(supplier3);
+
+        Ingredient ingredient1 = new Ingredient("Ingredient 1", "grams", supplier1, 1, 5, 1);
+        ingredients.add(ingredient1);
+        Ingredient ingredient2 = new Ingredient("Ingredient 2", "grams", supplier2, 1, 5, 1);
+        ingredients.add(ingredient2);
+        Ingredient ingredient3 = new Ingredient("Ingredient 3", "grams", supplier3, 1, 5, 1);
+        ingredients.add(ingredient3);
+
+        Dish dish1 = new Dish("Dish 1", "Dish 1", 1, 1, 10);
+        dishes.add(dish1);
+        Dish dish2 = new Dish("Dish 2", "Dish 2", 2, 1, 10);
+        dishes.add(dish2);
+        Dish dish3 = new Dish("Dish 3", "Dish 3", 3, 1, 10);
+        dishes.add(dish3);
+
+        HashMap<Dish, Number> orderMap = new HashMap<>();
+        orderMap.put(dish1, 5);
+        User user1 = register("admin", "admin", "zepler", postcode1);
+        Order order1 = new Order(orderMap, user1);
+        orders.add(order1);
+
+        dish1.getRecipe().put(ingredient1, 1);
+        dish1.getRecipe().put(ingredient2, 2);
+        dish2.getRecipe().put(ingredient2, 3);
+        dish2.getRecipe().put(ingredient2, 3);
+        dish3.getRecipe().put(ingredient3, 1);
+        dish3.getRecipe().put(ingredient2, 3);
+
+
+        staff.add(new Staff("Staff 1"));
+        staff.add(new Staff("Staff 2"));
+        staff.add(new Staff("Staff 3"));
+
+        drones.add(new Drone(1));
+        drones.add(new Drone(2));
+        drones.add(new Drone(3));
 	}
-	
 	@Override
 	public Restaurant getRestaurant() {
-		// TODO Auto-generated method stub
-		return null;
+        return this.restaurant;
 	}
 	
 	@Override
 	public String getRestaurantName() {
-		// TODO Auto-generated method stub
-		return null;
+        return this.restaurant.getName();
 	}
 
 	@Override
 	public Postcode getRestaurantPostcode() {
-		// TODO Auto-generated method stub
-		return null;
+        return this.restaurant.getLocation();
 	}
 	
 	@Override
 	public User register(String username, String password, String address, Postcode postcode) {
-		// TODO Auto-generated method stub
-		return null;
+        User mockuser = new User(username, password, address, postcode);
+        users.add(mockuser);
+        return mockuser;
 	}
 
 	@Override
 	public User login(String username, String password) {
-		// TODO Auto-generated method stub
-		return null;
+        return users.stream().filter(user -> user.getName().equals(username) && user.getPassword().equals(password)).findFirst().orElse(null);
 	}
 
 	@Override
 	public List<Postcode> getPostcodes() {
-		// TODO Auto-generated method stub
-		return null;
+        return this.postcodes;
 	}
 
 	@Override
 	public List<Dish> getDishes() {
-		// TODO Auto-generated method stub
-		return null;
+        return this.dishes;
 	}
 
 	@Override
 	public String getDishDescription(Dish dish) {
-		// TODO Auto-generated method stub
-		return null;
+        return dishes.get(dishes.indexOf(dish)).getDescription();
 	}
 
 	@Override
 	public Number getDishPrice(Dish dish) {
-		// TODO Auto-generated method stub
-		return null;
+        return dishes.get(dishes.indexOf(dish)).getPrice();
 	}
 
 	@Override
 	public Map<Dish, Number> getBasket(User user) {
-		// TODO Auto-generated method stub
-		return null;
+        for (Order order : orders) {
+            if (order.getUser().equals(user)) {
+                return order.getOrderForUser(user);
+            }
+        }
+        return null;
 	}
 
 	@Override
 	public Number getBasketCost(User user) {
-		// TODO Auto-generated method stub
+        for (Order order : orders) {
+            if (order.getUser().equals(user)) {
+                return order.getPrice();
+            }
+        }
 		return null;
 	}
 
 	@Override
 	public void addDishToBasket(User user, Dish dish, Number quantity) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -101,8 +161,7 @@ public class Client implements ClientInterface {
 
 	@Override
 	public Order checkoutBasket(User user) {
-		// TODO Auto-generated method stub
-		return null;
+        return orders.get(0);
 	}
 
 	@Override
@@ -113,8 +172,7 @@ public class Client implements ClientInterface {
 
 	@Override
 	public List<Order> getOrders(User user) {
-		// TODO Auto-generated method stub
-		return null;
+        return this.orders;
 	}
 
 	@Override
@@ -125,19 +183,17 @@ public class Client implements ClientInterface {
 
 	@Override
 	public String getOrderStatus(Order order) {
-		// TODO Auto-generated method stub
-		return null;
+        return order.getStatus();
 	}
 
 	@Override
 	public Number getOrderCost(Order order) {
-		// TODO Auto-generated method stub
-		return null;
+        return order.getPrice();
 	}
 
 	@Override
 	public void cancelOrder(Order order) {
-		// TODO Auto-generated method stub
+        orders.remove(order);
 
 	}
 

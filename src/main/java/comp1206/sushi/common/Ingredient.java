@@ -68,12 +68,12 @@ public class Ingredient extends Model {
 		this.weight = weight;
 	}
 
-	public Number getStock() {
-		return this.stock;
-	}
+    public Number getStock() {
+        return this.stock;
+    }
 
-	public void setStock(Number stock) {
-		this.stock = stock;
-	}
+    public void setStock(Number stock) {
+        this.stock = stock;
+    }
 
 }

@@ -29,6 +29,7 @@ class Configuration {
         this.server = server;
         createBufferedReader();
         loadConfig();
+
     }
 
     /**
@@ -37,6 +38,8 @@ class Configuration {
     private void createBufferedReader() {
         try {
             this.reader = new BufferedReader(new FileReader(this.cfgFile));
+            System.out.println("Working Directory = " +
+                    System.getProperty("user.dir"));
         } catch (FileNotFoundException e) {
             System.out.println(e);
         }
@@ -108,7 +111,7 @@ class Configuration {
             //case @Order
         else if (identifierArray[0].toLowerCase().matches("order")) {
             User user = stringToUser(identifierArray[1]);
-            HashMap<Dish, Integer> order = new HashMap<>();
+            HashMap<Dish, Number> order = new HashMap<>();
             String[] comaSplitter = identifierArray[2].split(",");
             for (String starSplitter : comaSplitter) {
                 String[] otherSplit = Pattern.compile(" \\* ").split(starSplitter);
@@ -170,6 +173,7 @@ class Configuration {
     /**
      * @param input the string value of the dish
      * @return @Dish object that is stored in server or null otherwise
+     * @
      */
     private Dish stringToDish(String input) {
         return server.getDishes().stream().filter(dish -> dish.getName().equals(input)).findFirst().orElse(null);
