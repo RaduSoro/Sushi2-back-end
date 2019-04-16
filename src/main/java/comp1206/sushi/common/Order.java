@@ -1,7 +1,6 @@
 package comp1206.sushi.common;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class Order extends Model {
 
@@ -18,7 +17,6 @@ public class Order extends Model {
 		return 1;
 	}
 
-	@Override
 	public String getName() {
 		return this.sushiEater.toString();
 	}
@@ -32,16 +30,8 @@ public class Order extends Model {
 		this.status = status;
 	}
 
-	public void addItemToOrder(User user, Dish dish, Number quantity) {
-
-	}
-
 	public User getUser() {
 		return this.sushiEater;
-	}
-
-	public Map<Dish, Number> getOrderForUser(User user) {
-		return this.order;
 	}
 
 	public Number getPrice() {

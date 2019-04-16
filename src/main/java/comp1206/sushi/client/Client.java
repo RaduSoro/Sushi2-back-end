@@ -60,10 +60,11 @@ public class Client implements ClientInterface {
         dishes.add(dish3);
 
         HashMap<Dish, Number> orderMap = new HashMap<>();
-        orderMap.put(dish1, 5);
+        orderMap.put(dish1, 20);
         User user1 = register("admin", "admin", "zepler", postcode1);
         Order order1 = new Order(orderMap, user1);
         orders.add(order1);
+        user1.addBasketToOrderHistory(order1);
 
         dish1.getRecipe().put(ingredient1, 1);
         dish1.getRecipe().put(ingredient2, 2);
@@ -100,6 +101,7 @@ public class Client implements ClientInterface {
 	public User register(String username, String password, String address, Postcode postcode) {
         User mockuser = new User(username, password, address, postcode);
         users.add(mockuser);
+        notifyUpdate();
         return mockuser;
 	}
 
@@ -130,49 +132,44 @@ public class Client implements ClientInterface {
 
 	@Override
 	public Map<Dish, Number> getBasket(User user) {
-        for (Order order : orders) {
-            if (order.getUser().equals(user)) {
-                return order.getOrderForUser(user);
-            }
-        }
-        return null;
+        return user.getBasket();
 	}
 
 	@Override
 	public Number getBasketCost(User user) {
-        for (Order order : orders) {
-            if (order.getUser().equals(user)) {
-                return order.getPrice();
-            }
-        }
-		return null;
+        return user.getBasket().keySet().stream().mapToInt(dish -> dish.getPrice().intValue() * user.getBasket().get(dish).intValue()).sum();
 	}
 
 	@Override
 	public void addDishToBasket(User user, Dish dish, Number quantity) {
-		// TODO Auto-generated method stub
+        if (quantity.intValue() > 0) {
+            user.addToBasket(dish, quantity);
+            notifyUpdate();
+        }
 	}
 
 	@Override
 	public void updateDishInBasket(User user, Dish dish, Number quantity) {
-		// TODO Auto-generated method stub
-
+        user.UpdateBasket(dish, quantity);
 	}
 
 	@Override
 	public Order checkoutBasket(User user) {
-        return orders.get(0);
+        Order orderToProcess = new Order(user.getBasket(), user);
+        orders.add(orderToProcess);
+        user.addBasketToOrderHistory(orderToProcess);
+        clearBasket(user);
+        return orderToProcess;
 	}
 
 	@Override
 	public void clearBasket(User user) {
-		// TODO Auto-generated method stub
-
+        user.clearBasket();
 	}
 
 	@Override
 	public List<Order> getOrders(User user) {
-        return this.orders;
+        return user.getOrderHistory();
 	}
 
 	@Override
@@ -193,8 +190,8 @@ public class Client implements ClientInterface {
 
 	@Override
 	public void cancelOrder(Order order) {
-        orders.remove(order);
-
+        order.setStatus("Canceled");
+        notifyUpdate();
 	}
 
 	@Override
