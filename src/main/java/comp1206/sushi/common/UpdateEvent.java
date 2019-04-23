@@ -11,7 +11,6 @@ public class UpdateEvent {
 	public Object oldValue;
 	public Object newValue;
 
-
 	/**
 	 * Create a new update event
 	 */

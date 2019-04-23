@@ -1,11 +1,14 @@
 package comp1206.sushi.client;
 
 
-import java.util.*;
-
 import comp1206.sushi.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Client implements ClientInterface {
 
@@ -101,7 +104,7 @@ public class Client implements ClientInterface {
 	public User register(String username, String password, String address, Postcode postcode) {
         User mockuser = new User(username, password, address, postcode);
         users.add(mockuser);
-        notifyUpdate();
+        this.notifyUpdate();
         return mockuser;
 	}
 
@@ -144,7 +147,7 @@ public class Client implements ClientInterface {
 	public void addDishToBasket(User user, Dish dish, Number quantity) {
         if (quantity.intValue() > 0) {
             user.addToBasket(dish, quantity);
-            notifyUpdate();
+            this.notifyUpdate();
         }
 	}
 
@@ -159,6 +162,7 @@ public class Client implements ClientInterface {
         orders.add(orderToProcess);
         user.addBasketToOrderHistory(orderToProcess);
         clearBasket(user);
+        this.notifyUpdate();
         return orderToProcess;
 	}
 
@@ -191,19 +195,18 @@ public class Client implements ClientInterface {
 	@Override
 	public void cancelOrder(Order order) {
         order.setStatus("Canceled");
-        notifyUpdate();
+        order.getUser().getOrderHistory().remove(order);
+        this.notifyUpdate();
 	}
 
 	@Override
 	public void addUpdateListener(UpdateListener listener) {
-		// TODO Auto-generated method stub
-
+        this.listeners.add(listener);
 	}
 
 	@Override
 	public void notifyUpdate() {
-		// TODO Auto-generated method stub
-
+        this.listeners.forEach(listener -> listener.updated(new UpdateEvent()));
 	}
 
 }

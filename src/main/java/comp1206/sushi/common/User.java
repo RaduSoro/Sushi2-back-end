@@ -38,7 +38,7 @@ public class User extends Model {
 	}
 
 	public void clearBasket() {
-		basket.clear();
+        this.basket.clear();
 	}
 
 	public HashMap<Dish, Number> getBasket() {

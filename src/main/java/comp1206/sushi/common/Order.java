@@ -9,7 +9,9 @@ public class Order extends Model {
 	private User sushiEater;
 
 	public Order(HashMap<Dish, Number> order, User sushiEater) {
-		this.order = order;
+		this.order = new HashMap<>();
+		this.order.putAll(order);
+		//this.order = order;
 		this.sushiEater = sushiEater;
 	}
 
@@ -35,7 +37,7 @@ public class Order extends Model {
 	}
 
 	public Number getPrice() {
-		return order.keySet().stream().mapToInt(dish -> dish.getPrice().intValue() * order.get(dish).intValue()).sum();
+		return this.order.keySet().stream().mapToInt(dish -> dish.getPrice().intValue() * order.get(dish).intValue()).sum();
 	}
 
 }
