@@ -67,17 +67,7 @@ public class Staff extends Model implements Runnable {
 	}
 
 	public void prepareDish(Dish dish) {
-		//checks if it has enough ingredients to do it
-		boolean hasEnoughIngredients = true;
-		for (Map.Entry<Ingredient, Number> entry : dish.getRecipe().entrySet()) {
-			Ingredient k = entry.getKey();
-			Number v = entry.getValue();
-			if (stockManagement.getCurrentStockIngredient(k).intValue() < v.intValue()) {
-				hasEnoughIngredients = false;
-				break;
-			}
-		}
-		if (hasEnoughIngredients) {
+        if (hasEnoughIngredients(dish)) {
 			dish.getRecipe().forEach((k, v) -> {
 				stockManagement.setIngredientStock(k, stockManagement.getCurrentStockIngredient(k).intValue() - v.intValue());
 			});
@@ -94,7 +84,6 @@ public class Staff extends Model implements Runnable {
 			System.out.println("new value " + stockManagement.getCurrentStockDish(dish) + " " + dish);
 			dish.decreaseFutureValue();
 			this.setStatus("Idle");
-
 		}
 	}
 
@@ -104,10 +93,7 @@ public class Staff extends Model implements Runnable {
 		for (Map.Entry<Dish, Number> entry : stockManagement.getDishStockLevels().entrySet()) {
 			Dish k = entry.getKey();
 			Number v = entry.getValue();
-			//checks if the stock for that dish is bigger than the threshold
-			//if it is it starts restocking it
-			if (k.getRestockThreshold().intValue() > v.intValue() &&
-					k.getFutureValue().intValue() + v.intValue() < k.getRestockThreshold().intValue()) {
+            if (k.getRestockThreshold().intValue() > v.intValue() && k.getFutureValue().intValue() + v.intValue() < k.getRestockThreshold().intValue()) {
 				dishToRestock = k;
 				foundDish = true;
 				k.increaseFutureValue();
@@ -119,4 +105,17 @@ public class Staff extends Model implements Runnable {
 			prepareDish(dishToRestock);
 		}
 	}
+
+    private boolean hasEnoughIngredients(Dish dish) {
+        boolean hasEnoughIngredients = true;
+        for (Map.Entry<Ingredient, Number> entry : dish.getRecipe().entrySet()) {
+            Ingredient k = entry.getKey();
+            Number v = entry.getValue();
+            if (stockManagement.getCurrentStockIngredient(k).intValue() < v.intValue()) {
+                hasEnoughIngredients = false;
+                break;
+            }
+        }
+        return hasEnoughIngredients;
+    }
 }

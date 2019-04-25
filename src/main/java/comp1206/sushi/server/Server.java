@@ -29,7 +29,6 @@ public class Server implements ServerInterface {
 
 	public Server() {
         logger.info("Starting up server...");
-
 		cfgReader = new Configuration("Sushi2-back-end\\src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this); //running from compiler
 		//cfgReader = new Configuration("src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this);//running from mvn
 	}

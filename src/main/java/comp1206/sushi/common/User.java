@@ -34,7 +34,7 @@ public class User extends Model {
 	}
 
 	public void UpdateBasket(Dish dish, Number quantity) {
-		basket.replace(dish, basket.get(dish), quantity);
+		this.basket.replace(dish, basket.get(dish), quantity);
 	}
 
 	public void clearBasket() {
