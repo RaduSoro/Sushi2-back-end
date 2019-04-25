@@ -4,8 +4,11 @@ import comp1206.sushi.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
  
 public class Server implements ServerInterface {
 
@@ -21,6 +24,7 @@ public class Server implements ServerInterface {
 	public ArrayList<User> users = new ArrayList<User>();
 	public ArrayList<Postcode> postcodes = new ArrayList<Postcode>();
 	private ArrayList<UpdateListener> listeners = new ArrayList<UpdateListener>();
+	private StockManagement stockManagement = new StockManagement();
     public Configuration cfgReader;
 
 	public Server() {
@@ -39,6 +43,7 @@ public class Server implements ServerInterface {
 	public Dish addDish(String name, String description, Number price, Number restockThreshold, Number restockAmount) {
 		Dish newDish = new Dish(name,description,price,restockThreshold,restockAmount);
 		this.dishes.add(newDish);
+		stockManagement.addDishToTracking(newDish);
 		this.notifyUpdate();
 		return newDish;
 	}
@@ -51,12 +56,7 @@ public class Server implements ServerInterface {
 
 	@Override
 	public Map<Dish, Number> getDishStockLevels() {
-		List<Dish> dishes = getDishes();
-		HashMap<Dish, Number> levels = new HashMap<Dish, Number>();
-		for(Dish dish : dishes) {
-            levels.put(dish, dish.getStock());
-		}
-		return levels;
+		return stockManagement.getDishStockLevels();
 	}
 	
 	@Override
@@ -71,12 +71,12 @@ public class Server implements ServerInterface {
 	
 	@Override
 	public void setStock(Dish dish, Number stock) {
-        dish.setStock(stock);
+		stockManagement.setDishStock(dish, stock);
 	}
 
 	@Override
 	public void setStock(Ingredient ingredient, Number stock) {
-        ingredient.setStock(stock);
+		stockManagement.setIngredientStock(ingredient, stock);
 	}
 
 	@Override
@@ -89,6 +89,7 @@ public class Server implements ServerInterface {
 			Number restockThreshold, Number restockAmount, Number weight) {
 		Ingredient mockIngredient = new Ingredient(name,unit,supplier,restockThreshold,restockAmount,weight);
 		this.ingredients.add(mockIngredient);
+		stockManagement.addIngredientToTracking(mockIngredient);
 		this.notifyUpdate();
 		return mockIngredient;
 	}
@@ -145,6 +146,7 @@ public class Server implements ServerInterface {
 	public Staff addStaff(String name) {
 		Staff mock = new Staff(name);
 		this.staff.add(mock);
+		mock.setStaffStockManagent(stockManagement);
 		return mock;
 	}
 
@@ -172,12 +174,7 @@ public class Server implements ServerInterface {
 
 	@Override
 	public Map<Ingredient, Number> getIngredientStockLevels() {
-		List<Ingredient> dishes = getIngredients();
-		HashMap<Ingredient, Number> levels = new HashMap<Ingredient, Number>();
-		for(Ingredient ingredient : ingredients) {
-            levels.put(ingredient, ingredient.getStock());
-		}
-		return levels;
+		return stockManagement.getIngredientStockLevels();
 	}
 
 	@Override
@@ -266,12 +263,7 @@ public class Server implements ServerInterface {
 
 	@Override
 	public String getOrderStatus(Order order) {
-		Random rand = new Random();
-		if(rand.nextBoolean()) {
-			return "Complete";
-		} else {
-			return "Pending";
-		}
+		return order.getStatus();
 	}
 	
 	@Override
@@ -286,12 +278,7 @@ public class Server implements ServerInterface {
 	
 	@Override
 	public String getStaffStatus(Staff staff) {
-		Random rand = new Random();
-		if(rand.nextBoolean()) {
-			return "Idle";
-		} else {
-			return "Working";
-		}
+		return staff.getStatus();
 	}
 
 	@Override

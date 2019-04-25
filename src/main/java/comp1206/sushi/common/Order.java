@@ -11,7 +11,6 @@ public class Order extends Model {
 	public Order(HashMap<Dish, Number> order, User sushiEater) {
 		this.order = new HashMap<>();
 		this.order.putAll(order);
-		//this.order = order;
 		this.sushiEater = sushiEater;
 	}
 

@@ -8,10 +8,11 @@ public class Dish extends Model {
 	private String name;
 	private String description;
 	private Number price;
-	private Number stock = 0;
+
 	private Map <Ingredient,Number> recipe;
 	private Number restockThreshold;
 	private Number restockAmount;
+    private Number futureValue = 0;
 
 	public Dish(String name, String description, Number price, Number restockThreshold, Number restockAmount) {
 		this.name = name;
@@ -21,6 +22,18 @@ public class Dish extends Model {
 		this.restockAmount = restockAmount;
 		this.recipe = new HashMap<Ingredient,Number>();
 	}
+
+    public Number getFutureValue() {
+        return futureValue;
+    }
+
+    public void increaseFutureValue() {
+        this.futureValue = this.futureValue.intValue() + 1;
+    }
+
+    public void decreaseFutureValue() {
+        this.futureValue = this.futureValue.intValue() - 1;
+    }
 
 	public String getName() {
 		return name;
@@ -69,13 +82,4 @@ public class Dish extends Model {
 	public Number getRestockAmount() {
 		return this.restockAmount;
 	}
-
-	public Number getStock() {
-		return this.stock;
-	}
-
-	public void setStock(Number stock) {
-		this.stock = stock;
-	}
-
 }

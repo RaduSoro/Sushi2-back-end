@@ -123,7 +123,7 @@ class Configuration {
         else if (identifierArray[0].toLowerCase().matches("stock")) {
             if (stringToIngredient(identifierArray[1]) != null)
                 server.setStock(stringToIngredient(identifierArray[1]), Integer.valueOf(identifierArray[2]));
-            if (stringToDish(identifierArray[1]) != null)
+            else if (stringToDish(identifierArray[1]) != null)
                 server.setStock(stringToDish(identifierArray[1]), Integer.valueOf(identifierArray[2]));
         }
         //case @Staff
