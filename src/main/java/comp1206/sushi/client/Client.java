@@ -15,45 +15,22 @@ public class Client implements ClientInterface {
 
     private static final Logger logger = LogManager.getLogger("Client");
     public ArrayList<Dish> dishes = new ArrayList<Dish>();
-    public ArrayList<Drone> drones = new ArrayList<Drone>();
     public ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
     public ArrayList<Order> orders = new ArrayList<Order>();
-    public ArrayList<Staff> staff = new ArrayList<Staff>();
-    public ArrayList<Supplier> suppliers = new ArrayList<Supplier>();
     public ArrayList<User> users = new ArrayList<User>();
     public ArrayList<Postcode> postcodes = new ArrayList<Postcode>();
     Postcode restaurantPostcode = new Postcode("SO17 1BJ");
     public Restaurant restaurant = new Restaurant("Mine", restaurantPostcode);
     private ArrayList<UpdateListener> listeners = new ArrayList<UpdateListener>();
     private ClientInterface client;
+    private Comms communications;
 
 	public Client() {
         logger.info("Starting up client...");
         postcodes.add(restaurantPostcode);
         Postcode postcode1 = new Postcode("SO17 1TJ");
         postcodes.add(postcode1);
-        Postcode postcode2 = new Postcode("SO17 1BX");
-        postcodes.add(postcode2);
-        Postcode postcode3 = new Postcode("SO17 2NJ");
-        postcodes.add(postcode3);
-        Postcode postcode4 = new Postcode("SO17 1TW");
-        postcodes.add(postcode4);
-        Postcode postcode5 = new Postcode("SO17 2LB");
-        postcodes.add(postcode5);
-
-        Supplier supplier1 = new Supplier("Supplier 1", postcode1);
-        suppliers.add(supplier1);
-        Supplier supplier2 = new Supplier("Supplier 2", postcode2);
-        suppliers.add(supplier2);
-        Supplier supplier3 = new Supplier("Supplier 3", postcode3);
-        suppliers.add(supplier3);
-
-        Ingredient ingredient1 = new Ingredient("Ingredient 1", "grams", supplier1, 1, 5, 1);
-        ingredients.add(ingredient1);
-        Ingredient ingredient2 = new Ingredient("Ingredient 2", "grams", supplier2, 1, 5, 1);
-        ingredients.add(ingredient2);
-        Ingredient ingredient3 = new Ingredient("Ingredient 3", "grams", supplier3, 1, 5, 1);
-        ingredients.add(ingredient3);
+        communications = new Comms(this);
 
         Dish dish1 = new Dish("Dish 1", "Dish 1", 1, 1, 10);
         dishes.add(dish1);
@@ -69,21 +46,6 @@ public class Client implements ClientInterface {
         orders.add(order1);
         user1.addBasketToOrderHistory(order1);
 
-        dish1.getRecipe().put(ingredient1, 1);
-        dish1.getRecipe().put(ingredient2, 2);
-        dish2.getRecipe().put(ingredient2, 3);
-        dish2.getRecipe().put(ingredient2, 3);
-        dish3.getRecipe().put(ingredient3, 1);
-        dish3.getRecipe().put(ingredient2, 3);
-
-
-        staff.add(new Staff("Staff 1"));
-        staff.add(new Staff("Staff 2"));
-        staff.add(new Staff("Staff 3"));
-
-        drones.add(new Drone(1));
-        drones.add(new Drone(2));
-        drones.add(new Drone(3));
 	}
 	@Override
 	public Restaurant getRestaurant() {
@@ -147,6 +109,7 @@ public class Client implements ClientInterface {
 	public void addDishToBasket(User user, Dish dish, Number quantity) {
         if (quantity.intValue() > 0) {
             user.addToBasket(dish, quantity);
+            communications.send("Naser mi-o beleste server msg to server");
             this.notifyUpdate();
         }
 	}

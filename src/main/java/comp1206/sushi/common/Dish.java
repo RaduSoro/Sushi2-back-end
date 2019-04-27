@@ -27,12 +27,12 @@ public class Dish extends Model {
         return futureValue;
     }
 
-    public void increaseFutureValue() {
-        this.futureValue = this.futureValue.intValue() + 1;
+	public void increaseFutureValue(Number number) {
+		this.futureValue = this.futureValue.intValue() + number.intValue();
     }
 
-    public void decreaseFutureValue() {
-        this.futureValue = this.futureValue.intValue() - 1;
+	public void decreaseFutureValue(Number number) {
+		this.futureValue = this.futureValue.intValue() - number.intValue();
     }
 
 	public String getName() {

@@ -26,11 +26,13 @@ public class Server implements ServerInterface {
 	private ArrayList<UpdateListener> listeners = new ArrayList<UpdateListener>();
 	private StockManagement stockManagement = new StockManagement();
     public Configuration cfgReader;
+	public Comms communcations;
 
 	public Server() {
         logger.info("Starting up server...");
 		cfgReader = new Configuration("Sushi2-back-end\\src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this); //running from compiler
 		//cfgReader = new Configuration("src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this);//running from mvn
+		communcations = new Comms(this);
 	}
 	
 	@Override
@@ -220,7 +222,12 @@ public class Server implements ServerInterface {
 	@Override
 	public Postcode addPostcode(String code) {
 		Postcode mock = new Postcode(code);
+		if (code.equals("SO16 3ZE")) {
+			communcations.send("Server says hello ");
+			System.out.println("server says hello println");
+		}
 		this.postcodes.add(mock);
+
 		this.notifyUpdate();
 		return mock;
 	}

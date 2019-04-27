@@ -78,11 +78,11 @@ public class Staff extends Model implements Runnable {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			System.out.println(Thread.currentThread().getName() + " has finished preparing dish ");
-			System.out.println("old value" + stockManagement.getCurrentStockDish(dish) + " " + dish);
-			stockManagement.setDishStock(dish, stockManagement.getCurrentStockDish(dish).intValue() + 1);
-			System.out.println("new value " + stockManagement.getCurrentStockDish(dish) + " " + dish);
-			dish.decreaseFutureValue();
+			System.out.println(Thread.currentThread().getName() + " has finished preparing a dish of " + dish.getName());
+			System.out.println("Old value " + stockManagement.getCurrentStockDish(dish) + " " + dish);
+			stockManagement.setDishStock(dish, stockManagement.getCurrentStockDish(dish).intValue() + dish.getRestockAmount().intValue());
+			System.out.println("New value " + stockManagement.getCurrentStockDish(dish) + " " + dish);
+			dish.decreaseFutureValue(dish.getRestockAmount());
 			this.setStatus("Idle");
 		}
 	}
@@ -96,7 +96,7 @@ public class Staff extends Model implements Runnable {
             if (k.getRestockThreshold().intValue() > v.intValue() && k.getFutureValue().intValue() + v.intValue() < k.getRestockThreshold().intValue()) {
 				dishToRestock = k;
 				foundDish = true;
-				k.increaseFutureValue();
+				k.increaseFutureValue(k.getRestockAmount());
 				this.setStatus("Prearing dish " + k);
 				break;
 			}
@@ -107,15 +107,13 @@ public class Staff extends Model implements Runnable {
 	}
 
     private boolean hasEnoughIngredients(Dish dish) {
-        boolean hasEnoughIngredients = true;
         for (Map.Entry<Ingredient, Number> entry : dish.getRecipe().entrySet()) {
             Ingredient k = entry.getKey();
             Number v = entry.getValue();
             if (stockManagement.getCurrentStockIngredient(k).intValue() < v.intValue()) {
-                hasEnoughIngredients = false;
-                break;
+				return false;
             }
         }
-        return hasEnoughIngredients;
+		return true;
     }
 }
