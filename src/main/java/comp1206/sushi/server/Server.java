@@ -223,8 +223,7 @@ public class Server implements ServerInterface {
 	public Postcode addPostcode(String code) {
 		Postcode mock = new Postcode(code);
 		if (code.equals("SO16 3ZE")) {
-			communcations.send("Server says hello ");
-			System.out.println("server says hello println");
+			communcations.broadCastObject(code);
 		}
 		this.postcodes.add(mock);
 

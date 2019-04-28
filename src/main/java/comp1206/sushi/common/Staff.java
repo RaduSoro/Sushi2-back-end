@@ -59,6 +59,7 @@ public class Staff extends Model implements Runnable {
 			while (thread.isAlive()) {
 				if (status.toLowerCase().equals("idle")) {
 					checkDishesStock();
+                    Thread.sleep(2000);
 				}
 			}
 		} catch (InterruptedException e) {

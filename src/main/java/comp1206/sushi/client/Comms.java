@@ -1,10 +1,8 @@
 package comp1206.sushi.client;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 public class Comms implements Runnable {
@@ -12,6 +10,8 @@ public class Comms implements Runnable {
     private Socket socket = null;
     private DataInputStream inputStream = null;
     private DataOutputStream outputStream = null;
+    private ObjectOutputStream objectOutputStream = null;
+    private ObjectInputStream objectInputStream = null;
     private String input = "";
     private Thread thread;
     private boolean foundHost = false;
@@ -21,22 +21,29 @@ public class Comms implements Runnable {
         thread = new Thread(this, "client");
         thread.start();
         connection();
+        System.out.println(foundHost + "2nd");
     }
 
     public void run() {
         System.out.println("Running thread client" + Thread.currentThread());
         System.out.println("Thread current id" + Thread.currentThread().getId());
         while (thread.isAlive()) {
-            receive();
+            //receive();
+            receiveObject();
         }
     }
 
     private void connection() {
+        System.out.println(foundHost);
         while (!this.foundHost) {
             try {
-                socket = new Socket("127.0.0.1", 5000);
-                inputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-                outputStream = new DataOutputStream(socket.getOutputStream());
+                socket = new Socket("127.0.0.2", 5000);
+//                inputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+//                outputStream = new DataOutputStream(socket.getOutputStream());
+                System.out.println("CREATED OOP");
+                objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+                objectOutputStream.flush();
+                objectInputStream = new ObjectInputStream(socket.getInputStream());
                 foundHost = true;
             } catch (UnknownHostException e) {
                 System.out.println("Waiting for server...");
@@ -52,6 +59,34 @@ public class Comms implements Runnable {
         }
     }
 
+    public void sendObject(Object object) {
+        if (foundHost) {
+            try {
+                System.out.println("Trying to send object " + object);
+                objectOutputStream.writeObject(object);
+            } catch (IOException io) {
+                io.printStackTrace();
+            }
+        }
+    }
+
+    public void receiveObject() {
+        while (foundHost) {
+            try {
+                objectInputStream = new ObjectInputStream(socket.getInputStream());
+                objectInputStream.reset();
+                Object o = objectInputStream.readObject();
+                System.out.println(o);
+            } catch (SocketException b) {
+                System.out.println("conn reset");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void receive() {
         while (this.foundHost) {
             try {
@@ -63,7 +98,6 @@ public class Comms implements Runnable {
             }
         }
     }
-
     public void send(String message) {
         if (foundHost) {
             try {

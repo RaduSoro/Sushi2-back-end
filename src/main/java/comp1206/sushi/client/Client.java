@@ -5,17 +5,17 @@ import comp1206.sushi.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Client implements ClientInterface {
+public class Client implements Serializable, ClientInterface {
 
 
     private static final Logger logger = LogManager.getLogger("Client");
     public ArrayList<Dish> dishes = new ArrayList<Dish>();
-    public ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
     public ArrayList<Order> orders = new ArrayList<Order>();
     public ArrayList<User> users = new ArrayList<User>();
     public ArrayList<Postcode> postcodes = new ArrayList<Postcode>();
@@ -41,7 +41,7 @@ public class Client implements ClientInterface {
 
         HashMap<Dish, Number> orderMap = new HashMap<>();
         orderMap.put(dish1, 20);
-        User user1 = register("admin", "admin", "zepler", postcode1);
+        User user1 = register("1", "1", "zepler", postcode1);
         Order order1 = new Order(orderMap, user1);
         orders.add(order1);
         user1.addBasketToOrderHistory(order1);
@@ -66,7 +66,6 @@ public class Client implements ClientInterface {
 	public User register(String username, String password, String address, Postcode postcode) {
         User mockuser = new User(username, password, address, postcode);
         users.add(mockuser);
-        this.notifyUpdate();
         return mockuser;
 	}
 
@@ -109,7 +108,7 @@ public class Client implements ClientInterface {
 	public void addDishToBasket(User user, Dish dish, Number quantity) {
         if (quantity.intValue() > 0) {
             user.addToBasket(dish, quantity);
-            communications.send("Naser mi-o beleste server msg to server");
+            communications.sendObject(dish);
             this.notifyUpdate();
         }
 	}

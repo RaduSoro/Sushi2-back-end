@@ -1,6 +1,8 @@
 package comp1206.sushi.common;
 
-public class Ingredient extends Model {
+import java.io.Serializable;
+
+public class Ingredient extends Model implements Serializable {
 
 	private String name;
 	private String unit;
