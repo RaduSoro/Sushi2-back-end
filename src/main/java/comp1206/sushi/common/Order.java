@@ -1,8 +1,9 @@
 package comp1206.sushi.common;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class Order extends Model {
+public class Order extends Model implements Serializable {
 
 	private String status = "Incomplete";
 	private HashMap<Dish, Number> order;

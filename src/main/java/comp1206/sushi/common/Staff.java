@@ -2,11 +2,12 @@ package comp1206.sushi.common;
 
 import comp1206.sushi.server.StockManagement;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Staff extends Model implements Runnable {
+public class Staff extends Model implements Runnable, Serializable {
 
 	private String name;
 	private String status;

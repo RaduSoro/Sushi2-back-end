@@ -63,7 +63,7 @@ public class Comms implements Runnable {
         if (foundHost) {
             try {
                 System.out.println("Trying to send object " + object);
-                objectOutputStream.writeObject(object);
+                this.objectOutputStream.writeObject(object);
             } catch (IOException io) {
                 io.printStackTrace();
             }
@@ -73,12 +73,10 @@ public class Comms implements Runnable {
     public void receiveObject() {
         while (foundHost) {
             try {
-                objectInputStream = new ObjectInputStream(socket.getInputStream());
-                objectInputStream.reset();
                 Object o = objectInputStream.readObject();
                 System.out.println(o);
             } catch (SocketException b) {
-                System.out.println("conn reset");
+                foundHost = false;
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {

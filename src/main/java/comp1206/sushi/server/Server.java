@@ -222,8 +222,8 @@ public class Server implements ServerInterface {
 	@Override
 	public Postcode addPostcode(String code) {
 		Postcode mock = new Postcode(code);
-		if (code.equals("SO16 3ZE")) {
-			communcations.broadCastObject(code);
+		if (code.equals("1")) {
+			communcations.broadcast(code);
 		}
 		this.postcodes.add(mock);
 

@@ -1,8 +1,8 @@
 package comp1206.sushi.common;
 
-import comp1206.sushi.common.Drone;
+import java.io.Serializable;
 
-public class Drone extends Model {
+public class Drone extends Model implements Serializable {
 
 	private Number speed;
 	private Number progress;
