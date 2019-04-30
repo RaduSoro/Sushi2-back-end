@@ -1,22 +1,24 @@
 package comp1206.sushi.client;
 
-import java.io.*;
+import comp1206.sushi.common.*;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
 public class Comms implements Runnable {
-    private ClientInterface client;
+    private Client client;
     private Socket socket = null;
-    private DataInputStream inputStream = null;
-    private DataOutputStream outputStream = null;
     private ObjectOutputStream objectOutputStream = null;
     private ObjectInputStream objectInputStream = null;
-    private String input = "";
     private Thread thread;
     private boolean foundHost = false;
 
-    public Comms(ClientInterface client) {
+    public Comms(Client client) {
         this.client = client;
         thread = new Thread(this, "client");
         thread.start();
@@ -38,9 +40,6 @@ public class Comms implements Runnable {
         while (!this.foundHost) {
             try {
                 socket = new Socket("127.0.0.2", 5000);
-//                inputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-//                outputStream = new DataOutputStream(socket.getOutputStream());
-                System.out.println("CREATED OOP");
                 objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
                 objectOutputStream.flush();
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -74,8 +73,11 @@ public class Comms implements Runnable {
         while (foundHost) {
             try {
                 Object o = objectInputStream.readObject();
-                System.out.println(o);
-            } catch (SocketException b) {
+                handleInput(o);
+            } catch (EOFException eof){
+                foundHost=false;
+            }
+            catch (SocketException b) {
                 foundHost = false;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -85,26 +87,23 @@ public class Comms implements Runnable {
         }
     }
 
-    private void receive() {
-        while (this.foundHost) {
-            try {
-                input = inputStream.readUTF();
-                System.out.println(input + "client receive");
-            } catch (IOException e) {
-                e.printStackTrace();
-                foundHost = false;
-            }
-        }
-    }
-    public void send(String message) {
-        if (foundHost) {
-            try {
-                outputStream.writeUTF(message);
-                System.out.println(message + " println");
-            } catch (IOException e) {
-                System.out.println("Failed reaching server");
-                foundHost = false;
-            }
+    public void handleInput(Object o){
+        if (o instanceof Dish){
+            System.out.println("Received dish " + o);
+            client.getDishes().add((Dish) o);
+        }else if (o instanceof Restaurant){
+            System.out.println("Received restaurant " + o);
+            client.setRestaurant((Restaurant) o);
+        }else if(o instanceof Postcode){
+            System.out.println("Received postcode " + o);
+            client.getPostcodes().add((Postcode) o);
+        }else if(o instanceof User){
+            client.users.add((User) o);
+        }else if (o instanceof Order){
+            client.orders.add((Order) o);
+            System.out.println("received order " + o);
+        } else{
+            System.out.println("Received idk " + o);
         }
     }
 }

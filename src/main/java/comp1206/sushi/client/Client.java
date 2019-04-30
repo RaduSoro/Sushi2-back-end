@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,34 +18,38 @@ public class Client implements Serializable, ClientInterface {
     public ArrayList<Order> orders = new ArrayList<Order>();
     public ArrayList<User> users = new ArrayList<User>();
     public ArrayList<Postcode> postcodes = new ArrayList<Postcode>();
-    Postcode restaurantPostcode = new Postcode("SO17 1BJ");
-    public Restaurant restaurant = new Restaurant("Mine", restaurantPostcode);
+    Postcode restaurantPostcode;
+    public Restaurant restaurant;
     private ArrayList<UpdateListener> listeners = new ArrayList<UpdateListener>();
     private ClientInterface client;
     private Comms communications;
 
 	public Client() {
         logger.info("Starting up client...");
-        postcodes.add(restaurantPostcode);
-        Postcode postcode1 = new Postcode("SO17 1TJ");
-        postcodes.add(postcode1);
+//        postcodes.add(restaurantPostcode);
+//        Postcode postcode1 = new Postcode("SO17 1TJ");
+//        postcodes.add(postcode1);
         communications = new Comms(this);
-
-        Dish dish1 = new Dish("Dish 1", "Dish 1", 1, 1, 10);
-        dishes.add(dish1);
-        Dish dish2 = new Dish("Dish 2", "Dish 2", 2, 1, 10);
-        dishes.add(dish2);
-        Dish dish3 = new Dish("Dish 3", "Dish 3", 3, 1, 10);
-        dishes.add(dish3);
-
-        HashMap<Dish, Number> orderMap = new HashMap<>();
-        orderMap.put(dish1, 20);
-        User user1 = register("1", "1", "zepler", postcode1);
-        Order order1 = new Order(orderMap, user1);
-        orders.add(order1);
-        user1.addBasketToOrderHistory(order1);
+//
+//        Dish dish1 = new Dish("Dish 1", "Dish 1", 1, 1, 10);
+//        dishes.add(dish1);
+//        Dish dish2 = new Dish("Dish 2", "Dish 2", 2, 1, 10);
+//        dishes.add(dish2);
+//        Dish dish3 = new Dish("Dish 3", "Dish 3", 3, 1, 10);
+//        dishes.add(dish3);
+//
+//        HashMap<Dish, Number> orderMap = new HashMap<>();
+//        orderMap.put(dish1, 20);
+//        User user1 = register("1", "1", "zepler", postcode1);
+//        Order order1 = new Order(orderMap, user1);
+//        orders.add(order1);
+//        user1.addBasketToOrderHistory(order1);
 
 	}
+	public void setRestaurant(Restaurant restaurant){
+		this.restaurant = restaurant;
+	}
+
 	@Override
 	public Restaurant getRestaurant() {
         return this.restaurant;
@@ -66,12 +69,15 @@ public class Client implements Serializable, ClientInterface {
 	public User register(String username, String password, String address, Postcode postcode) {
         User mockuser = new User(username, password, address, postcode);
         users.add(mockuser);
+        communications.sendObject(mockuser);
         return mockuser;
 	}
 
 	@Override
 	public User login(String username, String password) {
-        return users.stream().filter(user -> user.getName().equals(username) && user.getPassword().equals(password)).findFirst().orElse(null);
+		User loggedUser = users.stream().filter(user -> user.getName().equals(username) && user.getPassword().equals(password)).findFirst().orElse(null);
+		communications.sendObject(loggedUser);
+        return  loggedUser;
 	}
 
 	@Override
@@ -108,7 +114,6 @@ public class Client implements Serializable, ClientInterface {
 	public void addDishToBasket(User user, Dish dish, Number quantity) {
         if (quantity.intValue() > 0) {
             user.addToBasket(dish, quantity);
-            communications.sendObject(dish);
             this.notifyUpdate();
         }
 	}
@@ -124,6 +129,7 @@ public class Client implements Serializable, ClientInterface {
         orders.add(orderToProcess);
         user.addBasketToOrderHistory(orderToProcess);
         clearBasket(user);
+        communications.sendObject(orderToProcess);
         this.notifyUpdate();
         return orderToProcess;
 	}

@@ -22,7 +22,9 @@ public class Order extends Model implements Serializable {
 	public String getName() {
 		return this.sushiEater.toString();
 	}
-
+	public void setSushiEater(User user){
+		this.sushiEater = user;
+	}
 	public String getStatus() {
 		return status;
 	}

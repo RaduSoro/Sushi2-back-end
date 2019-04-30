@@ -21,7 +21,9 @@ public class User extends Model implements Serializable {
 		basket = new HashMap<>();
 		orderHistory = new ArrayList<>();
 	}
-
+	public String getAddress(){
+		return this.address;
+	}
 	public String getName() {
 		return name;
 	}

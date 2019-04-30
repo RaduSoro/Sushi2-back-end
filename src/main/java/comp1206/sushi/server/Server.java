@@ -30,9 +30,9 @@ public class Server implements ServerInterface {
 
 	public Server() {
         logger.info("Starting up server...");
+		communcations = new Comms(this);
 		cfgReader = new Configuration("Sushi2-back-end\\src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this); //running from compiler
 		//cfgReader = new Configuration("src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this);//running from mvn
-		communcations = new Comms(this);
 	}
 	
 	@Override
@@ -45,6 +45,7 @@ public class Server implements ServerInterface {
 		Dish newDish = new Dish(name,description,price,restockThreshold,restockAmount);
 		this.dishes.add(newDish);
 		stockManagement.addDishToTracking(newDish);
+		communcations.broadcast(newDish);
 		this.notifyUpdate();
 		return newDish;
 	}

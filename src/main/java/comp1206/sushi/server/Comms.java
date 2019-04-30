@@ -1,6 +1,7 @@
 package comp1206.sushi.server;
 
 
+import comp1206.sushi.common.Order;
 import comp1206.sushi.common.User;
 
 import java.io.DataOutputStream;
@@ -19,13 +20,32 @@ public class Comms implements Runnable {
     private Socket socket = null;
     private ServerSocket serverSocket = null;
     private Thread thread;
-
-    private HashMap<Socket, Wrapper> socketThreadHashMap = new HashMap<>();
+    private HashMap<Socket, ClientHandler> socketThreadHashMap = new HashMap<>();
 
     public Comms(ServerInterface server) {
         this.server = server;
         thread = new Thread(this, "server");
         thread.start();
+    }
+
+    public void sendInitialData(Socket socket){
+        server.getPostcodes().forEach(postcode -> {
+            sendObject(postcode,socket);
+        });
+
+        sendObject(server.getRestaurant(),socket);
+
+        server.getDishes().forEach(dish -> {
+            sendObject(dish,socket);
+        });
+
+        server.getUsers().forEach(user -> {
+            sendObject(user,socket);
+        });
+
+        server.getOrders().forEach(order -> {
+            sendObject(order,socket);
+        });
     }
 
     public synchronized void run() {
@@ -40,9 +60,19 @@ public class Comms implements Runnable {
             thread = new Thread() {
                 @Override
                 public void run() {
-                    Wrapper wrapper = new Wrapper(this, socket);
-                    socketThreadHashMap.put(socket, wrapper);
-                    readObject(socket, wrapper.getObjectInputStream());
+                    //creates the handler with the I/O object stream
+                    ClientHandler clientHandler = new ClientHandler(this, socket, server);
+                    socketThreadHashMap.put(socket, clientHandler);
+                    sendInitialData(socket);
+                    readObject(socket, clientHandler.getObjectInputStream());
+
+                    clientHandler = null;
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    this.interrupt();
                 }
             };
             thread.start();
@@ -53,13 +83,19 @@ public class Comms implements Runnable {
             ie.printStackTrace();
         }
     }
-
     public void readObject(Socket socket, ObjectInputStream objectInputStream) {
-        while (true) {
+        ClientHandler clientHandler = socketThreadHashMap.get(socket);
+        while (!clientHandler.getExitStatus()) {
             try {
                 Object o = objectInputStream.readObject();
+                handleClient(o,socket);
                 System.out.println(o + " given  by " + socket.getRemoteSocketAddress() + "3");
             } catch (SocketException se) {
+                clientHandler.closeStreams();
+                clientHandler.closeThread();
+                clientHandler.setExitStatus(true);
+                System.gc();
+                System.out.println("Connection with client lost");
             } catch (IOException i) {
                 i.printStackTrace();
             } catch (ClassNotFoundException cne) {
@@ -67,7 +103,6 @@ public class Comms implements Runnable {
             }
         }
     }
-
     public void sendObject(Object o, Socket socket) {
         try {
             ObjectOutputStream objectOutputStream = socketThreadHashMap.get(socket).getObjectOutputStream();
@@ -77,25 +112,36 @@ public class Comms implements Runnable {
             i.printStackTrace();
         }
     }
-
     public void broadcast(Object o) {
-        socketThreadHashMap.keySet().forEach((socket) -> {
-            sendObject(o, socket);
-        });
+        if (!socketThreadHashMap.isEmpty()){
+            socketThreadHashMap.keySet().forEach((socket) -> {
+                sendObject(o, socket);
+            });
+        }
     }
 
+    public void handleClient(Object o, Socket socket){
+        if(o instanceof User){
+            socketThreadHashMap.get(socket).setUser((User) o);
+        }else if (o instanceof Order){
+            server.getOrders().add((Order) o);
+        }
+    }
+}
 
-class Wrapper {
+class ClientHandler {
     Thread thread;
     User user;
     Socket socket;
+    private boolean status = false;
+    ServerInterface server;
     private ObjectOutputStream objectOutputStream = null;
     private ObjectInputStream objectInputStream = null;
-
-    public Wrapper(Thread thread, Socket socket) {
+    public ClientHandler(Thread thread, Socket socket, ServerInterface server) {
         this.thread = thread;
         this.user = null;
         this.socket = socket;
+        this.server = server;
         try {
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectOutputStream.flush();
@@ -103,6 +149,26 @@ class Wrapper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean getExitStatus(){
+        return this.status;
+    }
+    public void setExitStatus(boolean status){
+        this.status = status;
+    }
+
+    public void closeStreams(){
+        try {
+            this.objectOutputStream.close();
+            this.objectInputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void closeThread(){
+        this.thread = null;
     }
 
     public ObjectOutputStream getObjectOutputStream() {
@@ -128,5 +194,4 @@ class Wrapper {
     public void setThread(Thread thread) {
         this.thread = thread;
     }
-}
 }

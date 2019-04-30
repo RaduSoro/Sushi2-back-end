@@ -111,13 +111,15 @@ class Configuration {
             //case @Order
         else if (identifierArray[0].toLowerCase().matches("order")) {
             User user = stringToUser(identifierArray[1]);
-            HashMap<Dish, Number> order = new HashMap<>();
+            HashMap<Dish, Number> orederMap = new HashMap<>();
             String[] comaSplitter = identifierArray[2].split(",");
             for (String starSplitter : comaSplitter) {
                 String[] otherSplit = Pattern.compile(" \\* ").split(starSplitter);
-                order.put(stringToDish(otherSplit[1]), Integer.valueOf(otherSplit[0]));
+                orederMap.put(stringToDish(otherSplit[1]), Integer.valueOf(otherSplit[0]));
             }
-            server.orders.add(new Order(order, user));
+            Order order = new Order(orederMap,user);
+            server.orders.add(order);
+            user.addBasketToOrderHistory(order);
         }
         //case Stock
         else if (identifierArray[0].toLowerCase().matches("stock")) {
