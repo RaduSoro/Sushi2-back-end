@@ -4,12 +4,9 @@ import comp1206.sushi.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Random;
- 
+
 public class Server implements ServerInterface {
 
     private static final Logger logger = LogManager.getLogger("Server");
@@ -53,6 +50,8 @@ public class Server implements ServerInterface {
 	@Override
 	public void removeDish(Dish dish) {
 		this.dishes.remove(dish);
+		Map<Object, String> map = new HashMap<>();
+		map.put(dish, "remove");
 		this.notifyUpdate();
 	}
 
@@ -166,6 +165,9 @@ public class Server implements ServerInterface {
 	@Override
 	public void removeOrder(Order order) {
         this.orders.remove(order);
+		Map<Object, String> map = new HashMap<>();
+		map.put(order, "remove");
+		communcations.broadcast(map);
 		this.notifyUpdate();
 	}
 	
@@ -191,6 +193,7 @@ public class Server implements ServerInterface {
 
 	@Override
 	public Number getOrderDistance(Order order) {
+		//TO DO
         Order mock = order;
 		return mock.getDistance();
 	}
@@ -223,6 +226,7 @@ public class Server implements ServerInterface {
 	@Override
 	public Postcode addPostcode(String code) {
 		Postcode mock = new Postcode(code);
+		mock.calculateDistance(restaurant);
 		if (code.equals("1")) {
 			communcations.broadcast(code);
 		}
@@ -360,6 +364,4 @@ public class Server implements ServerInterface {
 	public Restaurant getRestaurant() {
 		return restaurant;
 	}
-
-
 }

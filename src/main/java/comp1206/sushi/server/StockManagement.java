@@ -24,6 +24,7 @@ public class StockManagement {
 
     /**
      * @synchronized to make sure only one thread can acces the stock values at a time
+     *
      * @return @Map<Dish,Number></Dish,Number> to acces the dish stock
      * getter for the map with dishes mapped to their stock
      */

@@ -73,7 +73,7 @@ public class Staff extends Model implements Runnable, Serializable {
 			dish.getRecipe().forEach((k, v) -> {
 				stockManagement.setIngredientStock(k, stockManagement.getCurrentStockIngredient(k).intValue() - v.intValue());
 			});
-			int timeToWait = ThreadLocalRandom.current().nextInt(20000, 61000);
+            int timeToWait = ThreadLocalRandom.current().nextInt(20000, 60001);
 			System.out.println(timeToWait / 1000 + " seconds wating");
 			try {
 				Thread.sleep(timeToWait);

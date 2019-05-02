@@ -23,20 +23,15 @@ public class Comms implements Runnable {
         thread = new Thread(this, "client");
         thread.start();
         connection();
-        System.out.println(foundHost + "2nd");
     }
 
     public void run() {
-        System.out.println("Running thread client" + Thread.currentThread());
-        System.out.println("Thread current id" + Thread.currentThread().getId());
         while (thread.isAlive()) {
-            //receive();
             receiveObject();
         }
     }
 
     private void connection() {
-        System.out.println(foundHost);
         while (!this.foundHost) {
             try {
                 socket = new Socket("127.0.0.2", 5000);
@@ -89,21 +84,28 @@ public class Comms implements Runnable {
 
     public void handleInput(Object o){
         if (o instanceof Dish){
-            System.out.println("Received dish " + o);
-            client.getDishes().add((Dish) o);
+            //if the element is not in the client update the value else add it
+            Dish dishInClient = client.getDishes().stream().filter(dish -> dish.getName().equals(((Dish) o).getName())).findFirst().orElse(null);
+            if (dishInClient == null) client.getDishes().add((Dish) o);
+            else dishInClient = (Dish) o;
         }else if (o instanceof Restaurant){
-            System.out.println("Received restaurant " + o);
             client.setRestaurant((Restaurant) o);
         }else if(o instanceof Postcode){
-            System.out.println("Received postcode " + o);
-            client.getPostcodes().add((Postcode) o);
+            Postcode postcodeInClient = client.getPostcodes().stream().filter(postcode -> postcode.getName().equals(((Postcode) o).getName())).findFirst().orElse(null);
+            if (postcodeInClient == null) {
+                client.getPostcodes().add((Postcode) o);
+            } else postcodeInClient = (Postcode) o;
+
         }else if(o instanceof User){
-            client.users.add((User) o);
+            User userInClient = client.users.stream().filter(user -> user.getName().equals(((User) o).getName())).findFirst().orElse(null);
+            if (userInClient == null) client.users.add((User) o);
+            else userInClient = (User) o;
         }else if (o instanceof Order){
-            client.orders.add((Order) o);
-            System.out.println("received order " + o);
+            Order orderInClient = client.orders.stream().filter(order -> order.getName().equals(((Order) o).getName()) && !(order.getStatus().equals(((Order) o).getStatus()))).findFirst().orElse(null);
+            if (orderInClient == null) client.orders.add((Order) o);
+            else orderInClient = (Order) o;
         } else{
-            System.out.println("Received idk " + o);
+            System.out.println("Received unknown client " + o);
         }
     }
 }

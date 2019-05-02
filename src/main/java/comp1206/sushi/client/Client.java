@@ -26,24 +26,7 @@ public class Client implements Serializable, ClientInterface {
 
 	public Client() {
         logger.info("Starting up client...");
-//        postcodes.add(restaurantPostcode);
-//        Postcode postcode1 = new Postcode("SO17 1TJ");
-//        postcodes.add(postcode1);
-        communications = new Comms(this);
-//
-//        Dish dish1 = new Dish("Dish 1", "Dish 1", 1, 1, 10);
-//        dishes.add(dish1);
-//        Dish dish2 = new Dish("Dish 2", "Dish 2", 2, 1, 10);
-//        dishes.add(dish2);
-//        Dish dish3 = new Dish("Dish 3", "Dish 3", 3, 1, 10);
-//        dishes.add(dish3);
-//
-//        HashMap<Dish, Number> orderMap = new HashMap<>();
-//        orderMap.put(dish1, 20);
-//        User user1 = register("1", "1", "zepler", postcode1);
-//        Order order1 = new Order(orderMap, user1);
-//        orders.add(order1);
-//        user1.addBasketToOrderHistory(order1);
+        communications = new Comms(this);.
 
 	}
 	public void setRestaurant(Restaurant restaurant){

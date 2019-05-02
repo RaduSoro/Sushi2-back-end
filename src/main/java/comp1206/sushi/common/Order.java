@@ -16,7 +16,7 @@ public class Order extends Model implements Serializable {
 	}
 
 	public Number getDistance() {
-		return 1;
+		return sushiEater.getDistance();
 	}
 
 	public String getName() {

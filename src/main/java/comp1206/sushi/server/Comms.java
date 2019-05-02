@@ -187,11 +187,4 @@ class ClientHandler {
         this.user = user;
     }
 
-    public Thread getThread() {
-        return this.thread;
-    }
-
-    public void setThread(Thread thread) {
-        this.thread = thread;
-    }
 }
