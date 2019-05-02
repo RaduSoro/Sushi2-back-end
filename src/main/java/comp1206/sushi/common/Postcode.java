@@ -50,7 +50,6 @@ public class Postcode extends Model implements Serializable {
 			Double restaurantLat = restaurantMap.get("lat");
 			Double resturantLong = restaurantMap.get("long");
 			this.distance = distance(postcodeLat, restaurantLat, postcodeLong, resturantLong);
-			System.out.println("Distance is " + distance);
 		}
 	}
 

@@ -2,17 +2,21 @@ package comp1206.sushi.server;
 
 import comp1206.sushi.common.Dish;
 import comp1206.sushi.common.Ingredient;
+import comp1206.sushi.common.Order;
 import comp1206.sushi.common.Restaurant;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class StockManagement {
     private HashMap<Ingredient, Number> ingredientStockLevels = new HashMap<>();
     private HashMap<Dish, Number> dishStockLevels = new HashMap<>();
     private Restaurant restaurant = null;
+    private Server server;
 
-    public StockManagement() {
+    public StockManagement(Server server) {
+        this.server = server;
     }
 
     public void setRestaurant(Restaurant restaurant) {
@@ -92,5 +96,9 @@ public class StockManagement {
      */
     public void setIngredientStock(Ingredient ingredient, Number number) {
         ingredientStockLevels.replace(ingredient, number);
+    }
+
+    public List<Order> getReadyOrders() {
+        return server.getOrders();
     }
 }

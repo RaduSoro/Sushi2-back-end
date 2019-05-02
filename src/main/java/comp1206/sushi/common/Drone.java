@@ -35,7 +35,7 @@ public class Drone extends Model implements Serializable {
             @Override
             public void run() {
                 checkIngredientsStock();
-                //System.out.println("scheduleAtFixedRate: 1 second   " + new Date());
+                deliverOrder();
             }
         }, 0, 1, SECONDS);
 
@@ -43,6 +43,29 @@ public class Drone extends Model implements Serializable {
 
     public void setDroneStaffManagement(StockManagement stockManagement) {
         this.stockManagement = stockManagement;
+    }
+
+    public synchronized void deliverOrder() {
+        for (Order order : stockManagement.getReadyOrders()) {
+            if (order.getStatus().equals("Incomplete")) {
+                this.destination = order.getUser().getPostcode();
+                this.source = stockManagement.getRestaurant().getLocation();
+                totalDistance = order.getDistance().doubleValue() * 2;
+                this.setStatus("Delivering order " + order);
+                double distanceCovered = 0;
+                order.setStatus("Delivering");
+                moveDrone(totalDistance, distanceCovered);
+                //should be completed
+                order.setStatus("Completed");
+                this.setStatus("Returning");
+                distanceCovered = 0;
+                moveDrone(totalDistance, distanceCovered);
+                this.setProgress(null);
+                this.destination = null;
+                this.source = null;
+                this.setStatus("Idle");
+            }
+        }
     }
 
     public synchronized void checkIngredientsStock() {
@@ -63,13 +86,7 @@ public class Drone extends Model implements Serializable {
         }
     }
 
-    public void restockIngredient(Ingredient ingredient) {
-        this.setStatus("Fetching ingredient " + ingredient);
-        this.destination = ingredient.getSupplier().getPostcode();
-        this.source = stockManagement.getRestaurant().getLocation();
-        totalDistance = destination.getDistance().intValue() * 2;
-        this.setStatus("Restocking " + ingredient.getName());
-        double distranceCovered = 0;
+    public void moveDrone(Number totalDistance, double distranceCovered) {
         while (distranceCovered <= totalDistance.doubleValue()) {
             procent = distranceCovered / totalDistance.doubleValue() * 100;
             this.setProgress(procent.intValue());
@@ -81,10 +98,22 @@ public class Drone extends Model implements Serializable {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void restockIngredient(Ingredient ingredient) {
+        this.destination = ingredient.getSupplier().getPostcode();
+        this.source = stockManagement.getRestaurant().getLocation();
+        totalDistance = destination.getDistance().intValue() * 2;
+        this.setStatus("Restocking " + ingredient.getName());
+        double distranceCovered = 0;
+        //moves the drone by  speed every second
+        moveDrone(totalDistance, distranceCovered);
         stockManagement.setIngredientStock(ingredient, stockManagement.getCurrentStockIngredient(ingredient).intValue() + ingredient.getRestockAmount().intValue());
         ingredient.decreaseFutureValue(ingredient.getRestockAmount());
-        this.setProgress(0);
-        this.setStatus("Idles");
+        this.setProgress(null);
+        this.destination = null;
+        this.source = null;
+        this.setStatus("Idle");
 
     }
 

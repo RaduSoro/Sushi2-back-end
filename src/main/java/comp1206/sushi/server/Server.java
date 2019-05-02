@@ -21,7 +21,7 @@ public class Server implements ServerInterface {
 	public ArrayList<User> users = new ArrayList<User>();
 	public ArrayList<Postcode> postcodes = new ArrayList<Postcode>();
 	private ArrayList<UpdateListener> listeners = new ArrayList<UpdateListener>();
-	private StockManagement stockManagement = new StockManagement();
+	private StockManagement stockManagement = new StockManagement(this);
     public Configuration cfgReader;
 	public Comms communcations;
 
