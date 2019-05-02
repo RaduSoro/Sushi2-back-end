@@ -26,7 +26,7 @@ public class Client implements Serializable, ClientInterface {
 
 	public Client() {
         logger.info("Starting up client...");
-        communications = new Comms(this);.
+        communications = new Comms(this);
 
 	}
 	public void setRestaurant(Restaurant restaurant){
