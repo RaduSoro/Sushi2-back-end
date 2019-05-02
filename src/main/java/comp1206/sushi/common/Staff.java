@@ -91,19 +91,17 @@ public class Staff extends Model implements Runnable, Serializable {
 
 	private synchronized void checkDishesStock() {
 		Dish dishToRestock = null;
-		Boolean foundDish = false;
 		for (Map.Entry<Dish, Number> entry : stockManagement.getDishStockLevels().entrySet()) {
-			Dish k = entry.getKey();
-			Number v = entry.getValue();
-            if (k.getRestockThreshold().intValue() > v.intValue() && k.getFutureValue().intValue() + v.intValue() < k.getRestockThreshold().intValue()) {
-				dishToRestock = k;
-				foundDish = true;
-				k.increaseFutureValue(k.getRestockAmount());
-				this.setStatus("Prearing dish " + k);
+			Dish dish = entry.getKey();
+			Number dishStock = entry.getValue();
+			if (dish.getRestockThreshold().intValue() > dishStock.intValue() && dish.getFutureValue().intValue() + dishStock.intValue() < dish.getRestockThreshold().intValue()) {
+				dishToRestock = dish;
+				dish.increaseFutureValue(dish.getRestockAmount());
+				this.setStatus("Prearing dish " + dish);
 				break;
 			}
 		}
-		if (foundDish) {
+		if (dishToRestock != null) {
 			prepareDish(dishToRestock);
 		}
 	}

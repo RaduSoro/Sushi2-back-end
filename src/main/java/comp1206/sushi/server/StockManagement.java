@@ -2,6 +2,7 @@ package comp1206.sushi.server;
 
 import comp1206.sushi.common.Dish;
 import comp1206.sushi.common.Ingredient;
+import comp1206.sushi.common.Restaurant;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,8 +10,21 @@ import java.util.Map;
 public class StockManagement {
     private HashMap<Ingredient, Number> ingredientStockLevels = new HashMap<>();
     private HashMap<Dish, Number> dishStockLevels = new HashMap<>();
+    private Restaurant restaurant = null;
 
     public StockManagement() {
+    }
+
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
+    }
+
+    public Restaurant getRestaurant() {
+        return this.restaurant;
+    }
+
+    public void addToCurrentStock(Ingredient ingredient) {
+
     }
 
     /**

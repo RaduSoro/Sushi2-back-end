@@ -128,6 +128,7 @@ public class Server implements ServerInterface {
 	@Override
 	public Drone addDrone(Number speed) {
 		Drone mock = new Drone(speed);
+		mock.setDroneStaffManagement(this.stockManagement);
 		this.drones.add(mock);
 		return mock;
 	}
@@ -227,6 +228,7 @@ public class Server implements ServerInterface {
 	public Postcode addPostcode(String code) {
 		Postcode mock = new Postcode(code);
 		mock.calculateDistance(restaurant);
+		if (stockManagement.getRestaurant() == null) stockManagement.setRestaurant(restaurant);
 		if (code.equals("1")) {
 			communcations.broadcast(code);
 		}

@@ -9,6 +9,7 @@ public class Ingredient extends Model implements Serializable {
 	private Supplier supplier;
 	private Number restockThreshold;
 	private Number restockAmount;
+	private Number futureValue;
 	private Number weight;
 
 	public Ingredient(String name, String unit, Supplier supplier, Number restockThreshold,
@@ -19,10 +20,27 @@ public class Ingredient extends Model implements Serializable {
 		this.setRestockThreshold(restockThreshold);
 		this.setRestockAmount(restockAmount);
 		this.setWeight(weight);
+		this.futureValue = 0;
 	}
 
 	public String getName() {
 		return name;
+	}
+
+	public Number getFutureValue() {
+		return this.futureValue;
+	}
+
+	public void setFutureValue(Number futureValue) {
+		this.futureValue = futureValue;
+	}
+
+	public void increaseFutureValue(Number number) {
+		this.futureValue = this.futureValue.intValue() + number.intValue();
+	}
+
+	public void decreaseFutureValue(Number number) {
+		this.futureValue = this.futureValue.intValue() - number.intValue();
 	}
 
 	public void setName(String name) {
