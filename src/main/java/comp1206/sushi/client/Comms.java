@@ -56,7 +56,6 @@ public class Comms implements Runnable {
     public void sendObject(Object object) {
         if (foundHost) {
             try {
-                System.out.println("Trying to send object " + object);
                 this.objectOutputStream.writeObject(object);
             } catch (IOException io) {
                 io.printStackTrace();
@@ -104,8 +103,24 @@ public class Comms implements Runnable {
             Order orderInClient = client.orders.stream().filter(order -> order.getName().equals(((Order) o).getName()) && !(order.getStatus().equals(((Order) o).getStatus()))).findFirst().orElse(null);
             if (orderInClient == null) client.orders.add((Order) o);
             else orderInClient = (Order) o;
-        } else{
-            System.out.println("Received unknown client " + o);
+        } else if (o instanceof ComplexMessage) {
+            //converts the order from server tot the one in client
+            Object object = ((ComplexMessage) o).getObject();
+            String instruction = ((ComplexMessage) o).getInstruction();
+            Order orderInClient = client.orders.stream().filter(order -> order.getOrderNumber().equals(((Order) object).getOrderNumber()) && order.getUser().getName().equals(((Order) object).getUser().getName())).findFirst().orElse(null);
+            if (orderInClient != null) {
+                switch (instruction) {
+                    case "update status":
+                        orderInClient.setStatus(((Order) object).getStatus());
+                        break;
+                    case "delete order":
+                        orderInClient.setStatus(((Order) object).getStatus());
+                        orderInClient.getUser().getOrderHistory().remove(orderInClient);
+                        break;
+                }
+            }
+        } else {
+            System.out.println("Unknown object " + o + o.getClass());
         }
     }
 }

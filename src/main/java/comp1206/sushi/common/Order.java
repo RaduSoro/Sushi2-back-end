@@ -8,15 +8,23 @@ public class Order extends Model implements Serializable {
 	private String status = "Incomplete";
 	private HashMap<Dish, Number> order;
 	private User sushiEater;
+	private String orderNumber;
 
 	public HashMap<Dish, Number> getOrderDishes() {
 		return this.order;
 	}
-
 	public Order(HashMap<Dish, Number> order, User sushiEater) {
 		this.order = new HashMap<>();
 		this.order.putAll(order);
 		this.sushiEater = sushiEater;
+	}
+
+	public String getOrderNumber() {
+		return this.orderNumber;
+	}
+
+	public void setOrderNumber(Integer number) {
+		this.orderNumber = sushiEater + number.toString();
 	}
 
 	public Number getDistance() {

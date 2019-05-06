@@ -69,7 +69,7 @@ public class Server implements ServerInterface {
 	public void setRestockingDishesEnabled(boolean enabled) {
 		
 	}
-	
+
 	@Override
 	public void setStock(Dish dish, Number stock) {
 		stockManagement.setDishStock(dish, stock);
@@ -86,8 +86,7 @@ public class Server implements ServerInterface {
 	}
 
 	@Override
-	public Ingredient addIngredient(String name, String unit, Supplier supplier,
-			Number restockThreshold, Number restockAmount, Number weight) {
+	public Ingredient addIngredient(String name, String unit, Supplier supplier, Number restockThreshold, Number restockAmount, Number weight) {
 		Ingredient mockIngredient = new Ingredient(name,unit,supplier,restockThreshold,restockAmount,weight);
 		this.ingredients.add(mockIngredient);
 		stockManagement.addIngredientToTracking(mockIngredient);
@@ -130,6 +129,7 @@ public class Server implements ServerInterface {
 		Drone mock = new Drone(speed);
 		mock.setDroneStaffManagement(this.stockManagement);
 		this.drones.add(mock);
+		mock.setServer(this);
 		return mock;
 	}
 
@@ -166,9 +166,7 @@ public class Server implements ServerInterface {
 	@Override
 	public void removeOrder(Order order) {
         this.orders.remove(order);
-		Map<Object, String> map = new HashMap<>();
-		map.put(order, "remove");
-		communcations.broadcast(map);
+		communcations.sendObject(new ComplexMessage(order, "delete order"), communcations.userToSocket(order.getUser().getName()));
 		this.notifyUpdate();
 	}
 	
@@ -194,7 +192,6 @@ public class Server implements ServerInterface {
 
 	@Override
 	public Number getOrderDistance(Order order) {
-		//TO DO
         Order mock = order;
 		return mock.getDistance();
 	}
@@ -277,7 +274,12 @@ public class Server implements ServerInterface {
 	public String getOrderStatus(Order order) {
 		return order.getStatus();
 	}
-	
+
+	public void setOrderStatus(Order order, String status) {
+		order.setStatus(status);
+		communcations.sendObject(new ComplexMessage(order, "update status"), communcations.userToSocket(order.getUser().getName()));
+	}
+
 	@Override
 	public String getDroneStatus(Drone drone) {
 		Random rand = new Random();

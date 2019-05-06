@@ -23,6 +23,7 @@ public class Client implements Serializable, ClientInterface {
     private ArrayList<UpdateListener> listeners = new ArrayList<UpdateListener>();
     private ClientInterface client;
     private Comms communications;
+    private Integer orderNumber = 0;
 
 	public Client() {
         logger.info("Starting up client...");
@@ -112,6 +113,8 @@ public class Client implements Serializable, ClientInterface {
         orders.add(orderToProcess);
         user.addBasketToOrderHistory(orderToProcess);
         clearBasket(user);
+        orderToProcess.setOrderNumber(orderNumber);
+        orderNumber++;
         communications.sendObject(orderToProcess);
         this.notifyUpdate();
         return orderToProcess;
@@ -146,6 +149,7 @@ public class Client implements Serializable, ClientInterface {
 	@Override
 	public void cancelOrder(Order order) {
         order.setStatus("Canceled");
+        communications.sendObject(new ComplexMessage(order, "delete order"));
         order.getUser().getOrderHistory().remove(order);
         this.notifyUpdate();
 	}

@@ -1,6 +1,7 @@
 package comp1206.sushi.server;
 
 
+import comp1206.sushi.common.ComplexMessage;
 import comp1206.sushi.common.Order;
 import comp1206.sushi.common.User;
 
@@ -12,6 +13,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashMap;
+import java.util.Map;
 
 
 public class Comms implements Runnable {
@@ -26,6 +28,24 @@ public class Comms implements Runnable {
         this.server = server;
         thread = new Thread(this, "server");
         thread.start();
+    }
+
+    /**
+     * @param user the logged in user
+     * @return socket for that client
+     */
+    public Socket userToSocket(String user) {
+        Socket socketToReturn = null;
+        for (Map.Entry<Socket, ClientHandler> entry : socketThreadHashMap.entrySet()) {
+            Socket socketClient = entry.getKey();
+            ClientHandler clientHandler = entry.getValue();
+            if (clientHandler.getUser().getName().equals(user)) {
+                System.out.println(" ERROR FIX " + clientHandler.getUser().getName() + user);
+                socketToReturn = socketClient;
+                return socketToReturn;
+            }
+        }
+        return socketToReturn;
     }
 
     public void sendInitialData(Socket socket){
@@ -89,7 +109,6 @@ public class Comms implements Runnable {
             try {
                 Object o = objectInputStream.readObject();
                 handleClient(o,socket);
-                System.out.println(o + " given  by " + socket.getRemoteSocketAddress() + "3");
             } catch (SocketException se) {
                 clientHandler.closeStreams();
                 clientHandler.closeThread();
@@ -104,6 +123,7 @@ public class Comms implements Runnable {
         }
     }
     public void sendObject(Object o, Socket socket) {
+        if (socket == null) return;
         try {
             ObjectOutputStream objectOutputStream = socketThreadHashMap.get(socket).getObjectOutputStream();
             objectOutputStream.writeObject(o);
@@ -122,9 +142,33 @@ public class Comms implements Runnable {
 
     public void handleClient(Object o, Socket socket){
         if(o instanceof User){
-            socketThreadHashMap.get(socket).setUser((User) o);
+            User receivedUser = (User) o;
+            User serverUser = null;
+            serverUser = server.getUsers().stream().filter(user -> user.getName().equals(receivedUser.getName()) && user.getPassword().equals(receivedUser.getPassword())).findFirst().orElse(null);
+            if (serverUser == null) {
+                server.getUsers().add(receivedUser);
+                serverUser = receivedUser;
+            }
+            socketThreadHashMap.get(socket).setUser(serverUser);
         }else if (o instanceof Order){
+            ((Order) o).setSushiEater(server.getUsers().stream().filter(user -> user.getName().equals(((Order) o).getUser().getName())).findFirst().orElse(null));
             server.getOrders().add((Order) o);
+        } else if (o instanceof ComplexMessage) {
+            //converts the order from server tot the one in client
+            Object object = ((ComplexMessage) o).getObject();
+            String instruction = ((ComplexMessage) o).getInstruction();
+            Order orderInServer = server.getOrders().stream().filter(order -> order.getUser().equals(((Order) object).getUser()) && order.getOrderNumber().equals(((Order) object).getOrderNumber())).findFirst().orElse(null);
+            if (orderInServer != null) {
+                switch (instruction) {
+                    case "update status":
+                        orderInServer.setStatus(((Order) object).getStatus());
+                        break;
+                    case "delete order":
+                        orderInServer.setStatus(((Order) object).getStatus());
+                        server.getOrders().remove(orderInServer);
+                        break;
+                }
+            }
         }
     }
 }

@@ -27,7 +27,7 @@ public class Ingredient extends Model implements Serializable {
 		return name;
 	}
 
-	public Number getFutureValue() {
+	public synchronized Number getFutureValue() {
 		return this.futureValue;
 	}
 
@@ -35,11 +35,11 @@ public class Ingredient extends Model implements Serializable {
 		this.futureValue = futureValue;
 	}
 
-	public void increaseFutureValue(Number number) {
+	public synchronized void increaseFutureValue(Number number) {
 		this.futureValue = this.futureValue.intValue() + number.intValue();
 	}
 
-	public void decreaseFutureValue(Number number) {
+	public synchronized void decreaseFutureValue(Number number) {
 		this.futureValue = this.futureValue.intValue() - number.intValue();
 	}
 

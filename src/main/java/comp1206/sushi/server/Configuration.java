@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.HashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
 class Configuration {
@@ -120,6 +121,7 @@ class Configuration {
             Order order = new Order(orederMap,user);
             server.orders.add(order);
             user.addBasketToOrderHistory(order);
+            order.setOrderNumber(ThreadLocalRandom.current().nextInt());
         }
         //case Stock
         else if (identifierArray[0].toLowerCase().matches("stock")) {

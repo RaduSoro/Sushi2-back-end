@@ -6,7 +6,6 @@ import comp1206.sushi.common.Order;
 import comp1206.sushi.common.Restaurant;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class StockManagement {
@@ -98,7 +97,39 @@ public class StockManagement {
         ingredientStockLevels.replace(ingredient, number);
     }
 
-    public List<Order> getReadyOrders() {
-        return server.getOrders();
+    /**
+     * Decreases the stock of the dish by the number you give it.
+     *
+     * @param dish   dish object you want to acces
+     * @param number the change in value for that dish.
+     */
+    public void decreaseDishStockByNumber(Dish dish, Number number) {
+        dishStockLevels.replace(dish, dishStockLevels.get(dish).intValue() - number.intValue());
+    }
+
+    /**
+     * @param dishFromClient the dish object from client
+     * @return Dish
+     * from server with the same name. Combats the null pointer execption from client dish
+     */
+    public Dish clientDishToServerDish(Dish dishFromClient) {
+        return server.getDishes().stream().filter(dish -> dish.getName().equals(dishFromClient.getName())).findFirst().orElse(null);
+    }
+
+    /**
+     * Searches the server for the first incomplete order, sets status to Delivering and sends it to
+     * the drone.
+     *
+     * @return Order
+     */
+    public synchronized Order getReadyOrders() {
+        Order orderToReturn = server.getOrders().stream().filter(order -> order.getStatus().equals("Incomplete")).findFirst().orElse(null);
+        if (orderToReturn != null) {
+            orderToReturn.setStatus("Delivering");
+            orderToReturn.getOrderDishes().forEach((dish, number) -> {
+                decreaseDishStockByNumber(clientDishToServerDish(dish), number);
+            });
+        }
+        return orderToReturn;
     }
 }
