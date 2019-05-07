@@ -123,7 +123,7 @@ public class Comms implements Runnable {
         }
     }
     public void sendObject(Object o, Socket socket) {
-        if (socket == null) return;
+        if (socket == null || socket.isClosed()) return;
         try {
             ObjectOutputStream objectOutputStream = socketThreadHashMap.get(socket).getObjectOutputStream();
             objectOutputStream.writeObject(o);

@@ -22,11 +22,11 @@ public class Comms implements Runnable {
         this.client = client;
         thread = new Thread(this, "client");
         thread.start();
-        connection();
     }
 
     public void run() {
         while (thread.isAlive()) {
+            connection();
             receiveObject();
         }
     }
@@ -83,41 +83,45 @@ public class Comms implements Runnable {
 
     public void handleInput(Object o){
         if (o instanceof Dish){
-            //if the element is not in the client update the value else add it
-            Dish dishInClient = client.getDishes().stream().filter(dish -> dish.getName().equals(((Dish) o).getName())).findFirst().orElse(null);
-            if (dishInClient == null) client.getDishes().add((Dish) o);
-            else dishInClient = (Dish) o;
+            client.dishes.add((Dish) o);
+            client.notifyUpdate();
+            System.out.println(((Dish) o).getName());
         }else if (o instanceof Restaurant){
             client.setRestaurant((Restaurant) o);
         }else if(o instanceof Postcode){
-            Postcode postcodeInClient = client.getPostcodes().stream().filter(postcode -> postcode.getName().equals(((Postcode) o).getName())).findFirst().orElse(null);
-            if (postcodeInClient == null) {
-                client.getPostcodes().add((Postcode) o);
-            } else postcodeInClient = (Postcode) o;
-
+            client.postcodes.add((Postcode) o);
         }else if(o instanceof User){
-            User userInClient = client.users.stream().filter(user -> user.getName().equals(((User) o).getName())).findFirst().orElse(null);
-            if (userInClient == null) client.users.add((User) o);
-            else userInClient = (User) o;
+            client.users.add((User) o);
         }else if (o instanceof Order){
-            Order orderInClient = client.orders.stream().filter(order -> order.getName().equals(((Order) o).getName()) && !(order.getStatus().equals(((Order) o).getStatus()))).findFirst().orElse(null);
-            if (orderInClient == null) client.orders.add((Order) o);
-            else orderInClient = (Order) o;
+            client.orders.add((Order) o);
         } else if (o instanceof ComplexMessage) {
             //converts the order from server tot the one in client
             Object object = ((ComplexMessage) o).getObject();
             String instruction = ((ComplexMessage) o).getInstruction();
-            Order orderInClient = client.orders.stream().filter(order -> order.getOrderNumber().equals(((Order) object).getOrderNumber()) && order.getUser().getName().equals(((Order) object).getUser().getName())).findFirst().orElse(null);
-            if (orderInClient != null) {
-                switch (instruction) {
-                    case "update status":
-                        orderInClient.setStatus(((Order) object).getStatus());
-                        break;
-                    case "delete order":
-                        orderInClient.setStatus(((Order) object).getStatus());
-                        orderInClient.getUser().getOrderHistory().remove(orderInClient);
-                        break;
-                }
+            switch (instruction) {
+                case "update status":
+                    if (object instanceof Order) {
+                        Order orderInClient = client.orders.stream().filter(order -> order.getOrderNumber().equals(((Order) object).getOrderNumber())).findFirst().orElse(null);
+                        if (orderInClient != null) orderInClient.setStatus(((Order) object).getStatus());
+                        client.notifyUpdate();
+                    }
+                    break;
+                case "delete":
+                    if (object instanceof Order) {
+                        Order orderInClient = client.orders.stream().filter(order -> order.getOrderNumber().equals(((Order) object).getOrderNumber())).findFirst().orElse(null);
+                        if (orderInClient != null) {
+                            orderInClient.setStatus(((Order) object).getStatus());
+                            orderInClient.getUser().getOrderHistory().remove(orderInClient);
+                        }
+                    } else if (object instanceof Dish) {
+                        Dish dishInClient = client.getDishes().stream().filter(dish -> dish.getName().equals(((Dish) object).getName())).findFirst().orElse(null);
+                        if (dishInClient != null) {
+                            client.getDishes().remove(dishInClient);
+                            System.out.println(client.getDishes());
+                            client.notifyUpdate();
+                        }
+                    }
+                    break;
             }
         } else {
             System.out.println("Unknown object " + o + o.getClass());

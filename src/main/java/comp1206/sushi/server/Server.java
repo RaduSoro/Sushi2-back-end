@@ -4,8 +4,11 @@ import comp1206.sushi.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 
 public class Server implements ServerInterface {
 
@@ -50,8 +53,7 @@ public class Server implements ServerInterface {
 	@Override
 	public void removeDish(Dish dish) {
 		this.dishes.remove(dish);
-		Map<Object, String> map = new HashMap<>();
-		map.put(dish, "remove");
+		communcations.broadcast(new ComplexMessage(dish, "delete"));
 		this.notifyUpdate();
 	}
 
@@ -166,7 +168,7 @@ public class Server implements ServerInterface {
 	@Override
 	public void removeOrder(Order order) {
         this.orders.remove(order);
-		communcations.sendObject(new ComplexMessage(order, "delete order"), communcations.userToSocket(order.getUser().getName()));
+		communcations.sendObject(new ComplexMessage(order, "delete"), communcations.userToSocket(order.getUser().getName()));
 		this.notifyUpdate();
 	}
 	
