@@ -9,6 +9,7 @@ public class Order extends Model implements Serializable {
 	private HashMap<Dish, Number> order;
 	private User sushiEater;
 	private String orderNumber;
+	private HashMap<Dish, Number> bufferOrder;
 
 	public HashMap<Dish, Number> getOrderDishes() {
 		return this.order;
@@ -17,6 +18,12 @@ public class Order extends Model implements Serializable {
 		this.order = new HashMap<>();
 		this.order.putAll(order);
 		this.sushiEater = sushiEater;
+		bufferOrder = new HashMap<>();
+		bufferOrder.putAll(this.order);
+	}
+
+	public HashMap<Dish, Number> getBufferOrder() {
+		return this.bufferOrder;
 	}
 
 	public String getOrderNumber() {

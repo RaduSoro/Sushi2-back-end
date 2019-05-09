@@ -123,13 +123,36 @@ public class StockManagement {
      * @return Order
      */
     public synchronized Order getReadyOrders() {
-        Order orderToReturn = server.getOrders().stream().filter(order -> order.getStatus().equals("Incomplete")).findFirst().orElse(null);
+        Order orderToReturn = server.getOrders().stream().filter(order -> order.getStatus().equals("Incomplete")).findAny().orElse(null);
         if (orderToReturn != null) {
-            orderToReturn.setStatus("Delivering");
-            orderToReturn.getOrderDishes().forEach((dish, number) -> {
-                decreaseDishStockByNumber(clientDishToServerDish(dish), number);
-            });
+            for (Map.Entry<Dish, Number> entry : orderToReturn.getBufferOrder().entrySet()) {
+                Dish dish = entry.getKey();
+                Number number = entry.getValue();
+                Dish serverSideDish = clientDishToServerDish(dish);
+                //if the ammount in server is lower than the order total move everything in order to trigger restocking
+                if (dishStockLevels.get(serverSideDish).intValue() <= number.intValue()) {
+                    orderToReturn.getBufferOrder().replace(dish, number.intValue() - dishStockLevels.get(serverSideDish).intValue());
+                    setDishStock(serverSideDish, 0);
+                } else if (dishStockLevels.get(serverSideDish).intValue() > number.intValue()) {
+                    decreaseDishStockByNumber(serverSideDish, number);
+                    orderToReturn.getBufferOrder().replace(dish, 0);
+                }
+            }
+
         }
-        return orderToReturn;
+        if (orderToReturn != null && orderHasAllDishesReady(orderToReturn)) return orderToReturn;
+        else return null;
+    }
+
+    public synchronized boolean orderHasAllDishesReady(Order order) {
+        for (Map.Entry<Dish, Number> entry : order.getBufferOrder().entrySet()) {
+            Dish dish = entry.getKey();
+            Number number = entry.getValue();
+            if (number.intValue() != 0) {
+                return false;
+            }
+        }
+        order.setStatus("Delivering");
+        return true;
     }
 }

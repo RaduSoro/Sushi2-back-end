@@ -34,7 +34,7 @@ public class Comms implements Runnable {
     private void connection() {
         while (!this.foundHost) {
             try {
-                socket = new Socket("127.0.0.2", 5000);
+                socket = new Socket("127.0.0.1", 5000);
                 objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
                 objectOutputStream.flush();
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -84,8 +84,11 @@ public class Comms implements Runnable {
     public void handleInput(Object o){
         if (o instanceof Dish){
             client.dishes.add((Dish) o);
-            client.notifyUpdate();
-            System.out.println(((Dish) o).getName());
+            try {
+                client.notifyUpdate();
+            } catch (Exception e) {
+            }
+
         }else if (o instanceof Restaurant){
             client.setRestaurant((Restaurant) o);
         }else if(o instanceof Postcode){
@@ -94,6 +97,13 @@ public class Comms implements Runnable {
             client.users.add((User) o);
         }else if (o instanceof Order){
             client.orders.add((Order) o);
+        } else if (o instanceof String) {
+            String receivedStatus = (String) o;
+            String[] splittedArray = receivedStatus.split(":");
+            String orderNumber = splittedArray[0];
+            String orderStats = splittedArray[1];
+            Order orderInClient = client.orders.stream().filter(order -> order.getOrderNumber().equals(orderNumber)).findFirst().orElse(null);
+            if (orderInClient != null) orderInClient.setStatus(orderStats);
         } else if (o instanceof ComplexMessage) {
             //converts the order from server tot the one in client
             Object object = ((ComplexMessage) o).getObject();
@@ -117,7 +127,6 @@ public class Comms implements Runnable {
                         Dish dishInClient = client.getDishes().stream().filter(dish -> dish.getName().equals(((Dish) object).getName())).findFirst().orElse(null);
                         if (dishInClient != null) {
                             client.getDishes().remove(dishInClient);
-                            System.out.println(client.getDishes());
                             client.notifyUpdate();
                         }
                     }

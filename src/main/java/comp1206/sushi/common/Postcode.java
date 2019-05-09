@@ -21,6 +21,12 @@ public class Postcode extends Model implements Serializable {
 		this.distance = Integer.valueOf(0);
 	}
 
+    public Postcode(String code, Restaurant restaurant) {
+        this.name = code;
+        calculateLatLong(code);
+        calculateDistance(restaurant);
+    }
+
 	
 	@Override
 	public String getName() {

@@ -4,6 +4,7 @@ import comp1206.sushi.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,12 +65,12 @@ public class Server implements ServerInterface {
 	
 	@Override
 	public void setRestockingIngredientsEnabled(boolean enabled) {
-		
+        //TO DO
 	}
 
 	@Override
 	public void setRestockingDishesEnabled(boolean enabled) {
-		
+        //TO DO
 	}
 
 	@Override
@@ -277,9 +278,15 @@ public class Server implements ServerInterface {
 		return order.getStatus();
 	}
 
+
 	public void setOrderStatus(Order order, String status) {
 		order.setStatus(status);
-		communcations.sendObject(new ComplexMessage(order, "update status"), communcations.userToSocket(order.getUser().getName()));
+        Socket userSocket = communcations.userToSocket(order.getUser().getName());
+        if (status.equals("Completed")) {
+            String parsable = order.getOrderNumber() + ":" + "Completed";
+            communcations.sendObject(parsable, userSocket);
+        } else if (userSocket != null && !status.equals("Completed"))
+            communcations.sendObject(new ComplexMessage(order, "update status"), userSocket);
 	}
 
 	@Override

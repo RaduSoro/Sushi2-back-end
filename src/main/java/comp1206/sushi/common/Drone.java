@@ -18,7 +18,7 @@ public class Drone extends Model implements Serializable {
     private StockManagement stockManagement;
 	private Postcode source;
 	private Postcode destination;
-    private Number totalDistance;
+    private Number distance;
     private Number procent;
 	private Thread thread;
 
@@ -26,7 +26,7 @@ public class Drone extends Model implements Serializable {
 		this.setSpeed(speed);
 		this.setCapacity(1);
 		this.setBattery(100);
-        totalDistance = 0;
+        distance = 0;
         procent = 0;
 		thread = new Thread() {
             @Override
@@ -57,21 +57,22 @@ public class Drone extends Model implements Serializable {
 		if (order != null) {
 			this.destination = order.getUser().getPostcode();
 			this.source = stockManagement.getRestaurant().getLocation();
-			totalDistance = order.getDistance().doubleValue() * 2;
+            distance = order.getDistance();
 			this.setStatus("Delivering order " + order);
 			double distanceCovered = 0;
-			server.setOrderStatus(order, "Delivering");
-			moveDrone(totalDistance, distanceCovered);
+            server.setOrderStatus(order, "Delivering");
+            moveDrone(distance, distanceCovered);
 			//should be completed
-			server.setOrderStatus(order, "Completed");
+            server.setOrderStatus(order, "Completed");
 			this.setStatus("Returning");
 			distanceCovered = 0;
 			this.source = destination;
 			this.destination = stockManagement.getRestaurant().getLocation();
-			moveDrone(totalDistance, distanceCovered);
+            moveDrone(distance, distanceCovered);
 			this.setProgress(null);
 			this.destination = null;
 			this.source = null;
+
 			this.setStatus("Idle");
 		}
 	}
@@ -85,7 +86,6 @@ public class Drone extends Model implements Serializable {
                 ingredientToRestock = ingredient;
                 ingredient.increaseFutureValue(ingredient.getRestockAmount());
                 this.setStatus("Restocking ingredient " + ingredient);
-                ingredient.increaseFutureValue(ingredient.getRestockAmount());
                 break;
             }
         }
@@ -111,11 +111,16 @@ public class Drone extends Model implements Serializable {
     public void restockIngredient(Ingredient ingredient) {
         this.destination = ingredient.getSupplier().getPostcode();
         this.source = stockManagement.getRestaurant().getLocation();
-        totalDistance = destination.getDistance().intValue() * 2;
+        distance = destination.getDistance();
         this.setStatus("Restocking " + ingredient.getName());
-        double distranceCovered = 0;
+        double distanceCovered = 0;
         //moves the drone by  speed every second
-		moveDrone(totalDistance, distranceCovered);
+        moveDrone(distance, distanceCovered);
+        this.setStatus("Returning");
+        this.source = destination;
+        distanceCovered = 0;
+        this.destination = stockManagement.getRestaurant().getLocation();
+        moveDrone(distance, distanceCovered);
         stockManagement.setIngredientStock(ingredient, stockManagement.getCurrentStockIngredient(ingredient).intValue() + ingredient.getRestockAmount().intValue());
         ingredient.decreaseFutureValue(ingredient.getRestockAmount());
         this.setProgress(null);

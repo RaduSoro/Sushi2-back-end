@@ -57,11 +57,15 @@ public class Staff extends Model implements Runnable, Serializable {
 		try {
 			System.out.println("Running thread " + Thread.currentThread());
 			Thread.sleep(50);
-			while (thread.isAlive()) {
-				if (status.toLowerCase().equals("idle")) {
-					checkDishesStock();
-                    Thread.sleep(2000);
+			while (true) {
+				//sleeps if the fatigue is about
+				if (getFatigue().intValue() == 100) {
+					setStatus("Break");
+					Thread.sleep(60000);
+					this.fatigue = 0;
 				}
+				checkDishesStock();
+				Thread.sleep(2000);
 			}
 		} catch (InterruptedException e) {
 			System.out.println(Thread.currentThread().getName() + "stoppped working");
@@ -74,19 +78,16 @@ public class Staff extends Model implements Runnable, Serializable {
 				stockManagement.setIngredientStock(k, stockManagement.getCurrentStockIngredient(k).intValue() - v.intValue());
 			});
             int timeToWait = ThreadLocalRandom.current().nextInt(20000, 60001);
-			System.out.println(timeToWait / 1000 + " seconds wating");
 			try {
 				Thread.sleep(timeToWait);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			System.out.println(Thread.currentThread().getName() + " has finished preparing a dish of " + dish.getName());
-			System.out.println("Old value " + stockManagement.getCurrentStockDish(dish) + " " + dish);
 			stockManagement.setDishStock(dish, stockManagement.getCurrentStockDish(dish).intValue() + dish.getRestockAmount().intValue());
-			System.out.println("New value " + stockManagement.getCurrentStockDish(dish) + " " + dish);
 			dish.decreaseFutureValue(dish.getRestockAmount());
-			this.setStatus("Idle");
+			fatigue = fatigue.intValue() + 5;
 		}
+		this.setStatus("Idle");
 	}
 
 	private synchronized void checkDishesStock() {
@@ -96,7 +97,6 @@ public class Staff extends Model implements Runnable, Serializable {
 			Number dishStock = entry.getValue();
 			if (dish.getRestockThreshold().intValue() > dishStock.intValue() && dish.getFutureValue().intValue() + dishStock.intValue() < dish.getRestockThreshold().intValue()) {
 				dishToRestock = dish;
-				dish.increaseFutureValue(dish.getRestockAmount());
 				this.setStatus("Prearing dish " + dish);
 				break;
 			}
@@ -114,6 +114,7 @@ public class Staff extends Model implements Runnable, Serializable {
 				return false;
             }
         }
+		dish.increaseFutureValue(dish.getRestockAmount());
 		return true;
     }
 }

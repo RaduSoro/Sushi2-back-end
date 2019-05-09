@@ -39,8 +39,7 @@ public class Comms implements Runnable {
         for (Map.Entry<Socket, ClientHandler> entry : socketThreadHashMap.entrySet()) {
             Socket socketClient = entry.getKey();
             ClientHandler clientHandler = entry.getValue();
-            if (clientHandler.getUser().getName().equals(user)) {
-                System.out.println(" ERROR FIX " + clientHandler.getUser().getName() + user);
+            if (clientHandler != null && clientHandler.getUser().getName().equals(user)) {
                 socketToReturn = socketClient;
                 return socketToReturn;
             }
@@ -85,7 +84,7 @@ public class Comms implements Runnable {
                     socketThreadHashMap.put(socket, clientHandler);
                     sendInitialData(socket);
                     readObject(socket, clientHandler.getObjectInputStream());
-
+                    socketThreadHashMap.remove(socket, clientHandler);
                     clientHandler = null;
                     try {
                         socket.close();
@@ -105,7 +104,7 @@ public class Comms implements Runnable {
     }
     public void readObject(Socket socket, ObjectInputStream objectInputStream) {
         ClientHandler clientHandler = socketThreadHashMap.get(socket);
-        while (!clientHandler.getExitStatus()) {
+        while (!clientHandler.getExitStatus() && !socket.isClosed()) {
             try {
                 Object o = objectInputStream.readObject();
                 handleClient(o,socket);
@@ -126,6 +125,10 @@ public class Comms implements Runnable {
         if (socket == null || socket.isClosed()) return;
         try {
             ObjectOutputStream objectOutputStream = socketThreadHashMap.get(socket).getObjectOutputStream();
+            if (o instanceof ComplexMessage) {
+                if (((ComplexMessage) o).getObject() instanceof Order)
+                    System.out.println(((Order) ((ComplexMessage) o).getObject()).getStatus());
+            }
             objectOutputStream.writeObject(o);
             objectOutputStream.flush();
         } catch (IOException i) {
