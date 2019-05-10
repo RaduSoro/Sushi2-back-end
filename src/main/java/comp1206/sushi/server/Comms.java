@@ -39,7 +39,7 @@ public class Comms implements Runnable {
         for (Map.Entry<Socket, ClientHandler> entry : socketThreadHashMap.entrySet()) {
             Socket socketClient = entry.getKey();
             ClientHandler clientHandler = entry.getValue();
-            if (clientHandler != null && clientHandler.getUser().getName().equals(user)) {
+            if (clientHandler != null && clientHandler.getUser().getName() != null && clientHandler.getUser().getName().equals(user)) {
                 socketToReturn = socketClient;
                 return socketToReturn;
             }
@@ -146,6 +146,7 @@ public class Comms implements Runnable {
             serverUser = server.getUsers().stream().filter(user -> user.getName().equals(receivedUser.getName()) && user.getPassword().equals(receivedUser.getPassword())).findFirst().orElse(null);
             if (serverUser == null) {
                 server.getUsers().add(receivedUser);
+                server.notifyUpdate();
                 serverUser = receivedUser;
             }
             socketThreadHashMap.get(socket).setUser(serverUser);

@@ -41,6 +41,7 @@ public class Comms implements Runnable {
                 foundHost = true;
             } catch (UnknownHostException e) {
                 System.out.println("Waiting for server...");
+                client.getDishes().clear();
                 foundHost = false;
             } catch (IOException i) {
                 System.out.println("Waiting for server...");
@@ -48,6 +49,7 @@ public class Comms implements Runnable {
                     Thread.sleep(5000);
                 } catch (InterruptedException ie) {
                 }
+                client.getDishes().clear();
                 foundHost = false;
             }
         }

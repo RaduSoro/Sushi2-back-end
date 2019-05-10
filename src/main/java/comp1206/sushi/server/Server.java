@@ -44,6 +44,7 @@ public class Server implements ServerInterface {
 	}
 
 	public synchronized void addStuffToDataPersistance() {
+		System.out.println("Tring to clean");
 		dataPersistance.clearArrays();
 		dataPersistance.addStuffToObjectList(restaurant.getLocation());
 		dataPersistance.addStuffToObjectList(restaurant);
@@ -138,6 +139,7 @@ public class Server implements ServerInterface {
 	public Supplier addSupplier(String name, Postcode postcode) {
 		Supplier mock = new Supplier(name,postcode);
 		this.suppliers.add(mock);
+		this.notifyUpdate();
 		return mock;
 	}
 
@@ -159,6 +161,7 @@ public class Server implements ServerInterface {
 		mock.setDroneStaffManagement(this.stockManagement);
 		this.drones.add(mock);
 		mock.setServer(this);
+		this.notifyUpdate();
 		return mock;
 	}
 
@@ -178,6 +181,7 @@ public class Server implements ServerInterface {
 		Staff mock = new Staff(name);
 		this.staff.add(mock);
 		mock.setStaffStockManagent(stockManagement);
+		this.notifyUpdate();
 		return mock;
 	}
 
@@ -255,11 +259,7 @@ public class Server implements ServerInterface {
 		Postcode mock = new Postcode(code);
 		mock.calculateDistance(restaurant);
 		if (stockManagement.getRestaurant() == null) stockManagement.setRestaurant(restaurant);
-		if (code.equals("1")) {
-			communcations.broadcast(code);
-		}
 		this.postcodes.add(mock);
-
 		this.notifyUpdate();
 		return mock;
 	}
@@ -295,6 +295,7 @@ public class Server implements ServerInterface {
 		drones.clear();
 		cfgReader = new Configuration(filename, this);
 		System.gc();
+		this.notifyUpdate();
 	}
 
 	@Override
@@ -381,6 +382,7 @@ public class Server implements ServerInterface {
 		try {
 			addStuffToDataPersistance();
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

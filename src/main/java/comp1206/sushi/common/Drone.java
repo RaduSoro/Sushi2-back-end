@@ -58,23 +58,25 @@ public class Drone extends Model implements Serializable {
 		if (order != null) {
 			this.destination = order.getUser().getPostcode();
 			this.source = stockManagement.getRestaurant().getLocation();
-            distance = order.getDistance();
+			distance = order.getDistance().doubleValue() * 2;
 			this.setStatus("Flying");
+			server.notifyUpdate();
 			double distanceCovered = 0;
             server.setOrderStatus(order, "Delivering");
-            moveDrone(distance, distanceCovered);
+			moveDrone(distance.doubleValue(), distanceCovered, distance.doubleValue() / 2);
 			//should be completed
+			server.notifyUpdate();
 			server.setOrderStatus(order, "Complete");
-			this.setStatus("Flying");
-			distanceCovered = 0;
 			this.source = destination;
 			this.destination = stockManagement.getRestaurant().getLocation();
-            moveDrone(distance, distanceCovered);
+			this.setStatus("Flying");
+			moveDrone(distance.doubleValue(), distance.doubleValue() / 2, distance.doubleValue());
 			this.setProgress(null);
 			this.destination = null;
 			this.source = null;
 
 			this.setStatus("Idle");
+			server.notifyUpdate();
 		}
 	}
 
@@ -95,9 +97,9 @@ public class Drone extends Model implements Serializable {
         }
     }
 
-	public void moveDrone(Number totalDistance, double distranceCovered) {
-		while (distranceCovered <= totalDistance.doubleValue()) {
-			procent = distranceCovered / totalDistance.doubleValue() * 100;
+	public void moveDrone(double totalDistance, double distranceCovered, double DistanceToMove) {
+		while (distranceCovered <= DistanceToMove) {
+			procent = distranceCovered / totalDistance * 100;
 			this.setProgress(procent.intValue());
 			this.notifyUpdate();
 			distranceCovered = distranceCovered + this.getSpeed().doubleValue();
@@ -112,16 +114,15 @@ public class Drone extends Model implements Serializable {
     public void restockIngredient(Ingredient ingredient) {
         this.destination = ingredient.getSupplier().getPostcode();
         this.source = stockManagement.getRestaurant().getLocation();
-        distance = destination.getDistance();
+		distance = destination.getDistance().doubleValue() * 2;
 		this.setStatus("Flying");
         double distanceCovered = 0;
         //moves the drone by  speed every second
-        moveDrone(distance, distanceCovered);
+		moveDrone(distance.doubleValue(), distanceCovered, distance.doubleValue() / 2);
 		this.setStatus("Flying");
         this.source = destination;
-        distanceCovered = 0;
         this.destination = stockManagement.getRestaurant().getLocation();
-        moveDrone(distance, distanceCovered);
+		moveDrone(distance.doubleValue(), distance.doubleValue() / 2, distance.doubleValue());
         stockManagement.setIngredientStock(ingredient, stockManagement.getCurrentStockIngredient(ingredient).intValue() + ingredient.getRestockAmount().intValue());
         ingredient.decreaseFutureValue(ingredient.getRestockAmount());
         this.setProgress(null);
