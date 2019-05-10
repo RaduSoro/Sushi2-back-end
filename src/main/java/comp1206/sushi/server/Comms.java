@@ -125,10 +125,6 @@ public class Comms implements Runnable {
         if (socket == null || socket.isClosed()) return;
         try {
             ObjectOutputStream objectOutputStream = socketThreadHashMap.get(socket).getObjectOutputStream();
-            if (o instanceof ComplexMessage) {
-                if (((ComplexMessage) o).getObject() instanceof Order)
-                    System.out.println(((Order) ((ComplexMessage) o).getObject()).getStatus());
-            }
             objectOutputStream.writeObject(o);
             objectOutputStream.flush();
         } catch (IOException i) {

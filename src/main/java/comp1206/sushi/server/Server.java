@@ -4,12 +4,13 @@ import comp1206.sushi.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 
 public class Server implements ServerInterface {
 
@@ -28,12 +29,37 @@ public class Server implements ServerInterface {
 	private StockManagement stockManagement = new StockManagement(this);
     public Configuration cfgReader;
 	public Comms communcations;
+	public DataPersistance dataPersistance;
 
 	public Server() {
         logger.info("Starting up server...");
 		communcations = new Comms(this);
-		cfgReader = new Configuration("Sushi2-back-end\\src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this); //running from compiler
+		File configFile = new File("Sushi2-back-end\\src\\main\\java\\comp1206\\sushi\\server\\save.txt");
+		if (!Files.exists(configFile.toPath()))
+			cfgReader = new Configuration("Sushi2-back-end\\src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this); //running from compiler
+			//if there is a data persistance load from it.
+		else cfgReader = new Configuration("Sushi2-back-end\\src\\main\\java\\comp1206\\sushi\\server\\save.txt", this);
+		dataPersistance = new DataPersistance(this);
 		//cfgReader = new Configuration("src\\main\\java\\comp1206\\sushi\\server\\cfg.txt", this);//running from mvn
+	}
+
+	public synchronized void addStuffToDataPersistance() {
+		dataPersistance.clearArrays();
+		dataPersistance.addStuffToObjectList(restaurant.getLocation());
+		dataPersistance.addStuffToObjectList(restaurant);
+		postcodes.forEach(postcode -> {
+			if (!postcode.equals(restaurant.getLocation()))
+				dataPersistance.addStuffToObjectList(postcode);
+		});
+		suppliers.forEach(supplier -> dataPersistance.addStuffToObjectList(supplier));
+		ingredients.forEach(ingredient -> dataPersistance.addStuffToObjectList(ingredient));
+		dishes.forEach(dish -> dataPersistance.addStuffToObjectList(dish));
+		users.forEach(user -> dataPersistance.addStuffToObjectList(user));
+		orders.forEach(order -> dataPersistance.addStuffToObjectList(order));
+		dataPersistance.addStuffToObjectList(stockManagement);
+		staff.forEach(staff1 -> dataPersistance.addStuffToObjectList(staff1));
+		drones.forEach(drone -> dataPersistance.addStuffToObjectList(drone));
+		dataPersistance.writeToFile();
 	}
 	
 	@Override
@@ -168,7 +194,7 @@ public class Server implements ServerInterface {
 
 	@Override
 	public void removeOrder(Order order) {
-        this.orders.remove(order);
+		this.orders.remove(order);
 		communcations.sendObject(new ComplexMessage(order, "delete"), communcations.userToSocket(order.getUser().getName()));
 		this.notifyUpdate();
 	}
@@ -201,7 +227,7 @@ public class Server implements ServerInterface {
 
 	@Override
 	public void addIngredientToDish(Dish dish, Ingredient ingredient, Number quantity) {
-		if(quantity == Integer.valueOf(0)) {
+		if (quantity.equals(Integer.valueOf(0))) {
 			removeIngredientFromDish(dish,ingredient);
 		} else {
 			dish.getRecipe().put(ingredient,quantity);
@@ -257,7 +283,18 @@ public class Server implements ServerInterface {
 
 	@Override
 	public void loadConfiguration(String filename) {
+		postcodes.clear();
+		restaurant = null;
+		suppliers.clear();
+		ingredients.clear();
+		dishes.clear();
+		users.clear();
+		orders.clear();
+		dataPersistance.addStuffToObjectList(stockManagement);
+		staff.clear();
+		drones.clear();
 		cfgReader = new Configuration(filename, this);
+		System.gc();
 	}
 
 	@Override
@@ -270,7 +307,7 @@ public class Server implements ServerInterface {
 
 	@Override
 	public boolean isOrderComplete(Order order) {
-		return true;
+		return order.getStatus().equals("Complete");
 	}
 
 	@Override
@@ -282,21 +319,16 @@ public class Server implements ServerInterface {
 	public void setOrderStatus(Order order, String status) {
 		order.setStatus(status);
         Socket userSocket = communcations.userToSocket(order.getUser().getName());
-        if (status.equals("Completed")) {
-            String parsable = order.getOrderNumber() + ":" + "Completed";
+		if (status.equals("Complete") && userSocket != null) {
+			String parsable = order.getOrderNumber() + ":" + "Complete";
             communcations.sendObject(parsable, userSocket);
-        } else if (userSocket != null && !status.equals("Completed"))
+		} else if (userSocket != null && !status.equals("Complete"))
             communcations.sendObject(new ComplexMessage(order, "update status"), userSocket);
 	}
 
 	@Override
 	public String getDroneStatus(Drone drone) {
-		Random rand = new Random();
-		if(rand.nextBoolean()) {
-			return "Idle";
-		} else {
-			return "Flying";
-		}
+		return drone.getStatus();
 	}
 	
 	@Override
@@ -346,6 +378,10 @@ public class Server implements ServerInterface {
 	@Override
 	public void notifyUpdate() {
 		this.listeners.forEach(listener -> listener.updated(new UpdateEvent()));
+		try {
+			addStuffToDataPersistance();
+		} catch (Exception e) {
+		}
 	}
 
 	@Override

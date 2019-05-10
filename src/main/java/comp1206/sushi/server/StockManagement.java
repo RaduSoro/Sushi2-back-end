@@ -122,8 +122,8 @@ public class StockManagement {
      *
      * @return Order
      */
-    public synchronized Order getReadyOrders() {
-        Order orderToReturn = server.getOrders().stream().filter(order -> order.getStatus().equals("Incomplete")).findAny().orElse(null);
+    public Order getReadyOrders() {
+        Order orderToReturn = getFirstReadyOrder();
         if (orderToReturn != null) {
             for (Map.Entry<Dish, Number> entry : orderToReturn.getBufferOrder().entrySet()) {
                 Dish dish = entry.getKey();
@@ -141,7 +141,16 @@ public class StockManagement {
 
         }
         if (orderToReturn != null && orderHasAllDishesReady(orderToReturn)) return orderToReturn;
-        else return null;
+        else {
+            if (orderToReturn != null) orderToReturn.setStatus("Incomplete");
+            return null;
+        }
+    }
+
+    public synchronized Order getFirstReadyOrder() {
+        Order orderToReturn = server.getOrders().stream().filter(order -> order.getStatus().equals("Incomplete")).findAny().orElse(null);
+        if (orderToReturn != null) orderToReturn.setStatus("Checking ingredients");
+        return orderToReturn;
     }
 
     public synchronized boolean orderHasAllDishesReady(Order order) {

@@ -2,10 +2,7 @@ package comp1206.sushi.server;
 
 import comp1206.sushi.common.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
@@ -56,6 +53,12 @@ class Configuration {
             }
         } catch (Exception e) {
             System.out.print(e);
+        }
+        //server.notifyUpdate();
+        try {
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -137,7 +140,7 @@ class Configuration {
         else if (identifierArray[0].toLowerCase().matches("drone"))
             server.addDrone(Integer.valueOf(identifierArray[1]));
 
-        server.notifyUpdate();
+        //server.notifyUpdate();
     }
 
 

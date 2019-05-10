@@ -26,6 +26,7 @@ public class Drone extends Model implements Serializable {
 		this.setSpeed(speed);
 		this.setCapacity(1);
 		this.setBattery(100);
+		this.status = "Idle";
         distance = 0;
         procent = 0;
 		thread = new Thread() {
@@ -58,13 +59,13 @@ public class Drone extends Model implements Serializable {
 			this.destination = order.getUser().getPostcode();
 			this.source = stockManagement.getRestaurant().getLocation();
             distance = order.getDistance();
-			this.setStatus("Delivering order " + order);
+			this.setStatus("Flying");
 			double distanceCovered = 0;
             server.setOrderStatus(order, "Delivering");
             moveDrone(distance, distanceCovered);
 			//should be completed
-            server.setOrderStatus(order, "Completed");
-			this.setStatus("Returning");
+			server.setOrderStatus(order, "Complete");
+			this.setStatus("Flying");
 			distanceCovered = 0;
 			this.source = destination;
 			this.destination = stockManagement.getRestaurant().getLocation();
@@ -112,11 +113,11 @@ public class Drone extends Model implements Serializable {
         this.destination = ingredient.getSupplier().getPostcode();
         this.source = stockManagement.getRestaurant().getLocation();
         distance = destination.getDistance();
-        this.setStatus("Restocking " + ingredient.getName());
+		this.setStatus("Flying");
         double distanceCovered = 0;
         //moves the drone by  speed every second
         moveDrone(distance, distanceCovered);
-        this.setStatus("Returning");
+		this.setStatus("Flying");
         this.source = destination;
         distanceCovered = 0;
         this.destination = stockManagement.getRestaurant().getLocation();
